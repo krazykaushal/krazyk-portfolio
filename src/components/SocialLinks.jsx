@@ -41,7 +41,7 @@ const SocialLinks = () => {
         </>
       ),
       href: resume,
-      download: true,
+      download: "Kaushal_Resume.pdf",
     },
   ];
 
