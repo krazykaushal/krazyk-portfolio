@@ -39,7 +39,7 @@ const NavBar = () => {
             smooth
             duration={500}
           >
-            {"<"}KrazyK /{">"}
+            {"<"}KaushaL /{">"}
           </Link>
         </h1>
       </div>
