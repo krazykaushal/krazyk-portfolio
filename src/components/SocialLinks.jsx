@@ -2,8 +2,9 @@ import React from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { HiOutlineMail } from "react-icons/hi";
 import { BsFillPersonLinesFill } from "react-icons/bs";
-import resume from "../assets/resume.pdf";
+import resume from "../assets/kaushal_resume.pdf";
 const SocialLinks = () => {
+  // resume_link = "../assets/kaushal_resume.pdf"
   const links = [
     {
       id: 1,
@@ -60,7 +61,7 @@ const SocialLinks = () => {
             <a
               href={href}
               className="flex justify-between items-center w-full text-white"
-              download={download}
+              download
               target="_blank"
               rel="noreferrer"
             >
