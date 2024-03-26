@@ -2,7 +2,7 @@ import React from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { HiOutlineMail } from "react-icons/hi";
 import { BsFillPersonLinesFill } from "react-icons/bs";
-import resume from "../assets/kaushal_resume.pdf";
+
 const SocialLinks = () => {
   // resume_link = "../assets/kaushal_resume.pdf"
   const links = [
@@ -13,7 +13,7 @@ const SocialLinks = () => {
           LinkedIn <FaLinkedin size={30} />
         </>
       ),
-      href: "https://in.linkedin.com/in/kaushal-patel-65480710a",
+      href: "https://in.linkedin.com/in/kaushalpatel29",
       style: "rounded-tr-md",
     },
     {
@@ -41,15 +41,14 @@ const SocialLinks = () => {
           Resume <BsFillPersonLinesFill size={30} />
         </>
       ),
-      href: resume,
-      download: "Kaushal_Resume.pdf",
+      href: process.env.REACT_APP_RESUME_LINK
     },
   ];
 
   return (
     <div className="hidden md:flex flex-col top-[35%] left-0 fixed">
       <ul>
-        {links.map(({ id, child, href, style, download }) => (
+        {links.map(({ id, child, href, style }) => (
           <li
             key={id}
             className={
@@ -61,7 +60,6 @@ const SocialLinks = () => {
             <a
               href={href}
               className="flex justify-between items-center w-full text-white"
-              download={download}
               target="_blank"
               rel="noreferrer"
             >
