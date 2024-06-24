@@ -1,6 +1,7 @@
 import React from "react";
 import dash from "../assets/portfolio/dash.png";
 import purvey from "../assets/portfolio/purveyingfee.png";
+import anime from "../assets/portfolio/anime.png";
 import zoobdb from "../assets/portfolio/zoobdb.png";
 import promptopia from "../assets/portfolio/promptopia.png";
 import { FaArrowUpRightFromSquare, FaGithub } from "react-icons/fa6";
@@ -10,25 +11,32 @@ const Portfolio = () => {
   const portfolios = [
     {
       id: 1,
+      src: anime,
+      name: "Krazy-Anime",
+      link: "https://krazy-anime-stream.vercel.app/",
+      repo: "https://github.com/krazykaushal/krazy_anime_stream"
+    },
+    {
+      id: 2,
       src: dash,
       name: "DA-SH",
       link: "https://da-sh.vercel.app/",
       repo: "https://github.com/krazykaushal/Educational-Networking-Tools-for-Students",
     },
     {
-      id: 2,
+      id: 3,
       name: "Purveying-F.E.E",
       src: purvey,
       repo: "https://github.com/krazykaushal/Purveying-Fee-KrazyK",
     },
     {
-      id: 3,
+      id: 4,
       name: "Zoo-B-DB",
       src: zoobdb,
       repo: "https://github.com/krazykaushal/Zoo-B-DB",
     },
     {
-      id: 4,
+      id: 5,
       name: "Promptopia",
       src: promptopia,
       repo: "https://github.com/krazykaushal/Promptopia",
