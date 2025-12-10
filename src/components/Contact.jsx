@@ -1,20 +1,82 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
-
-//function for form reset
-function handleSubmit(e) {
-  setTimeout(() => {
-    e.target.reset();
-  }, 3000);
-}
+import toast, { Toaster } from "react-hot-toast";
 
 const Contact = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check rate limiting
+  const checkRateLimit = () => {
+    const submissions = JSON.parse(localStorage.getItem("formSubmissions") || "[]");
+    const now = Date.now();
+    const fiveMinutesAgo = now - 5 * 60 * 1000; // 5 minutes in milliseconds
+
+    // Filter submissions within last 5 minutes
+    const recentSubmissions = submissions.filter(
+      (timestamp) => timestamp > fiveMinutesAgo
+    );
+
+    // Update localStorage with only recent submissions
+    localStorage.setItem("formSubmissions", JSON.stringify(recentSubmissions));
+
+    // Allow max 2 submissions in 5 minutes
+    return recentSubmissions.length < 2;
+  };
+
+  // Record submission
+  const recordSubmission = () => {
+    const submissions = JSON.parse(localStorage.getItem("formSubmissions") || "[]");
+    submissions.push(Date.now());
+    localStorage.setItem("formSubmissions", JSON.stringify(submissions));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check rate limit
+    if (!checkRateLimit()) {
+      toast.error("Too many submissions! Please wait a few minutes before trying again.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("https://getform.io/f/mbkGE5bz", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Message sent successfully! I'll get back to you soon.");
+        recordSubmission();
+        setTimeout(() => {
+          form.reset();
+        }, 2000);
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
+      console.error("Form submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div
       name="contact"
       className="contact w-full bg-gradient-to-b from-black to-gray-800 p-4 text-white"
     >
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="flex flex-col px-4 pt-24 justify-center max-w-screen-lg mx-auto h-full">
         <div className="pb-8">
           <p className="text-4xl font-bold inline border-b-4 border-gray-500">
@@ -27,8 +89,6 @@ const Contact = () => {
           <form
             onSubmit={handleSubmit}
             name="contact"
-            method="POST"
-            action="https://getform.io/f/mbkGE5bz "
             className=" flex flex-col w-full md:w-1/2"
           >
             <input
@@ -55,9 +115,10 @@ const Contact = () => {
 
             <button
               type="submit"
-              className="text-white bg-gradient-to-b from-cyan-500 to-blue-500 px-6 py-3 my-8 mx-auto flex items-center rounded-md hover:scale-110 duration-300"
+              disabled={isSubmitting}
+              className="text-white bg-gradient-to-b from-cyan-500 to-blue-500 px-6 py-3 my-8 mx-auto flex items-center rounded-md hover:scale-110 duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Send Message
+              {isSubmitting ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>
