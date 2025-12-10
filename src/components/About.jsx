@@ -15,7 +15,7 @@ const About = () => {
         <div className="flex flex-col lg:flex-row ">
           <div className="lg:w-1/2">
             <p className="text-xl mt-5">
-              I am a Web Developer, working in both, <b>Backend</b> and{" "}
+              I am a Software Engineer, working in both, <b>Backend</b> and{" "}
               <b>Frontend </b>
               technology. I have created Websites using <b>MERN </b> stack and{" "}
               <b>Next.js</b>. I consider myself a self-taught developer, a quick
@@ -37,7 +37,7 @@ const About = () => {
                 Experience
               </h5>
               <p class="mb-2 font-medium text-neutral-200 text-lg">
-                Software Intern{" "}
+                Software Engineer{" "}
                 <a
                   href="https://www.infoanalytica.com/"
                   className="text-blue-400"

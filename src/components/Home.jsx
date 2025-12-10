@@ -30,7 +30,7 @@ const Home = () => {
           </h2>
           <p className="text-gray-800 font-bold pb-3 md:py-4 max-w-m text-2xl md:text-5xl">
             {" "}
-            A Web Developer
+            Software Engineer
           </p>
 
           <div className="portfolio-btn">
