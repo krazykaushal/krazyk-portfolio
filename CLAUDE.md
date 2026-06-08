@@ -111,6 +111,19 @@ Docs to lean on: GSAP (gsap.com/docs), ScrollTrigger, and the React integration 
 
 ---
 
+## Responsive design (mobile-first, always)
+
+This site must work well on mobile from day one — not as a Phase 5 retrofit.
+
+- **Write mobile-first Tailwind:** start with the base (smallest) layout, then layer `sm:`, `md:`, `lg:` overrides. Never write desktop-only styles and patch mobile later.
+- **Test at 375px width** (iPhone SE — a common small baseline) and 768px (tablet) alongside desktop during every phase.
+- Touch targets must be at least 44×44px (Apple HIG / WCAG guideline).
+- No `hover:`-only interactions that have no touch equivalent. If something only works on hover, it must also work on tap/focus.
+- The avatar's `track` state has no cursor on mobile — always pair it with a touch/scroll fallback (covered in the avatar system section).
+- Avoid fixed pixel widths on containers; prefer `max-w-*` with `w-full` so content reflows naturally.
+
+---
+
 ## Code conventions
 
 - Functional components + hooks only. No class components.
@@ -125,12 +138,12 @@ Docs to lean on: GSAP (gsap.com/docs), ScrollTrigger, and the React integration 
 
 ## Build roadmap (check off as we go)
 
-- [ ] **Phase 0** — Scaffold done (`create-next-app` defaults: TS, Tailwind v4, ESLint, App Router, Turbopack). Remaining: first Git commit, GitHub repo, deploy to Vercel so the pipeline works end to end.
-- [ ] **Phase 1** — Static layout + content for all sections. No animation yet. Get structure and styling right.
+- [x] **Phase 0** — Scaffold + first commit + GitHub repo + Vercel deploy. Pipeline live end to end.
+- [x] **Phase 1** — Static layout + content for all sections (Hero, About, Work, Skills, Contact). Dark-by-default theme via class-based dark mode + design tokens in `globals.css`. Contact uses a Web3Forms-backed form (`ContactForm.tsx`, the one `'use client'` island; key in `.env.local` as `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`). Mobile-first throughout.
 - [ ] **Phase 2** — Drop in the static avatar SVG, then add cursor-tracking (first real interaction).
 - [ ] **Phase 3** — GSAP scroll animations: section reveals + avatar `point` state via ScrollTrigger.
 - [ ] **Phase 4** — Idle micro-animations, intro/loader, hover reactions, the click easter egg.
-- [ ] **Phase 5** — Responsive pass, `prefers-reduced-motion`, performance + a11y, final deploy.
+- [ ] **Phase 5** — `prefers-reduced-motion`, performance + a11y audit, final deploy. (Responsive is built in from Phase 1, not a separate pass.)
 
 Work strictly in order. Don't start a phase before the previous one is solid.
 
