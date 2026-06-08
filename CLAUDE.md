@@ -139,8 +139,8 @@ This site must work well on mobile from day one — not as a Phase 5 retrofit.
 ## Build roadmap (check off as we go)
 
 - [x] **Phase 0** — Scaffold + first commit + GitHub repo + Vercel deploy. Pipeline live end to end.
-- [x] **Phase 1** — Static layout + content for all sections (Hero, About, Work, Skills, Contact). Dark-by-default theme via class-based dark mode + design tokens in `globals.css`. Contact uses a Web3Forms-backed form (`ContactForm.tsx`, the one `'use client'` island; key in `.env.local` as `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`). Mobile-first throughout.
-- [ ] **Phase 2** — Drop in the static avatar SVG, then add cursor-tracking (first real interaction).
+- [x] **Phase 1** — Static layout + content for all sections (Hero, About, Work, Skills, Contact). Dark-by-default theme via class-based dark mode + design tokens in `globals.css`. Contact uses a Web3Forms-backed form (`ContactForm.tsx`, a `'use client'` island; key in `.env.local` as `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`). Mobile-first throughout.
+- [x] **Phase 2** — Avatar SVG inlined as a React component (`components/Avatar/Avatar.tsx`, `'use client'`; source art in `avatar-source.svg`, `viewBox` cropped to the figure). Eyes track the cursor via `useGSAP` + `gsap.quickTo` (eyes+glints in their own `<g>`; eyebrows fixed). GSAP installed; plugins registered once in `lib/gsap.ts` (import gsap/useGSAP from there). Tracking respects `prefers-reduced-motion` and rests centered on touch. Rendered in the Hero beside the text with a light circular backdrop.
 - [ ] **Phase 3** — GSAP scroll animations: section reveals + avatar `point` state via ScrollTrigger.
 - [ ] **Phase 4** — Idle micro-animations, intro/loader, hover reactions, the click easter egg.
 - [ ] **Phase 5** — `prefers-reduced-motion`, performance + a11y audit, final deploy. (Responsive is built in from Phase 1, not a separate pass.)
