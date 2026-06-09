@@ -56,6 +56,7 @@ export default function Work() {
         {projects.map((project) => (
           <li
             key={project.name}
+            data-avatar-react
             className="flex flex-col rounded-xl border border-foreground/10 bg-surface p-6 transition-colors hover:border-accent/40"
           >
             <h3 className="text-lg font-semibold text-foreground">

@@ -22,12 +22,14 @@ export default function Hero() {
       <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
         <a
           href="#work"
+          data-avatar-react
           className="rounded-full bg-accent px-6 py-3 text-center text-sm font-semibold text-background transition-opacity hover:opacity-80"
         >
           See my work
         </a>
         <a
           href="#contact"
+          data-avatar-react
           className="rounded-full border border-foreground/20 px-6 py-3 text-center text-sm font-semibold text-foreground transition-colors hover:border-foreground/50"
         >
           Get in touch
