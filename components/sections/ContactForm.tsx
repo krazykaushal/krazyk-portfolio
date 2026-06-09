@@ -55,7 +55,7 @@ export default function ContactForm() {
 
   // Shared input styles — pulled into a const so the three fields stay in sync.
   const fieldClasses =
-    "rounded-lg border border-foreground/10 bg-surface px-4 py-3 text-foreground placeholder:text-muted focus:border-accent focus:outline-none";
+    "rounded-lg border border-foreground/10 bg-surface px-4 py-3 text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/50";
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 flex max-w-xl flex-col gap-5">
