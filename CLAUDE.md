@@ -143,9 +143,23 @@ This site must work well on mobile from day one — not as a Phase 5 retrofit.
 - [x] **Phase 2** — Avatar SVG inlined as a React component (`components/Avatar/Avatar.tsx`, `'use client'`; source art in `avatar-source.svg`, `viewBox` cropped to the figure). Eyes track the cursor via `useGSAP` + `gsap.quickTo` (eyes+glints in their own `<g>`; eyebrows fixed). GSAP installed; plugins registered once in `lib/gsap.ts` (import gsap/useGSAP from there). Tracking respects `prefers-reduced-motion` and rests centered on touch. Rendered in the Hero beside the text with a light circular backdrop.
 - [x] **Phase 3** — GSAP scroll animations via ScrollTrigger. Sections fade/slide in on scroll through a reusable `<Reveal>` client wrapper (`components/ui/Reveal.tsx`; sections stay server components, passed as children). Avatar lifted out of the Hero into a sticky side lane in `app/page.tsx` (sticky on md+, stacked on top on mobile) so it stays in view while content scrolls; Hero is now text-only. Avatar `point` reaction = head tilt (`headRef`, rotates around the neck via `svgOrigin`) + eyebrow raise (`browsRef`), a paused timeline replayed by one ScrollTrigger per section. ScrollTrigger registered in `lib/gsap.ts`.
 - [x] **Phase 4** — Avatar personality, all driven from hooks in `Avatar.tsx`: idle breathing (figure scale loop) + random blink; on-load intro (svg pop + head-tilt/brow greeting); hover reaction (eyebrows perk on `[data-avatar-react]` elements — hero CTAs + project cards); click easter egg (boop each click, full spin every 5th). All gated on `prefers-reduced-motion`.
-- [x] **Phase 5** — `prefers-reduced-motion` CSS net (avatar GSAP already JS-gated), contact-form focus rings, real hero tagline, SEO metadata + code-generated OG image (`app/opengraph-image.tsx` via `next/og`) + SVG monogram favicon (`app/icon.svg`). Remaining: final production deploy (merge `v2` → `main`) and an optional Lighthouse pass. (Responsive built in from Phase 1.)
+- [x] **Phase 5** — `prefers-reduced-motion` CSS net (avatar GSAP already JS-gated), contact-form focus rings, real hero tagline, SEO metadata + code-generated OG image (`app/opengraph-image.tsx` via `next/og`) + SVG monogram favicon (`app/icon.svg`). Remaining: final production deploy (merge `v2` → `main`) and an optional Lighthouse pass. (Responsive built in from Phase 1.) Lighthouse: 100/100/100/100 desktop, 99/100/100/100 mobile.
+- [ ] **Phase 6 — Enhancements** (independent of each other; tackle in any order, one at a time). See notes below.
+  - [ ] **Social links** — GitHub, LinkedIn, and a Resume (Google Drive) link.
+  - [ ] **Hero background animation** — a subtle animated backdrop (reference reactbits.dev).
+  - [ ] **About as a terminal UI** — restyle the About section like a console.
+  - [ ] **Light-mode toggle** — a theme switch with persistence.
 
-Work strictly in order. Don't start a phase before the previous one is solid.
+Work Phases 0–5 strictly in order. Phase 6 items are independent — pick any, but still do one at a time (small diffs).
+
+---
+
+## Phase 6 enhancement notes
+
+- **Social links (GitHub, LinkedIn, Resume).** These are *public profile* links, so unlike the email they're fine to commit. Likely a small icon row in the Contact section and/or a footer. Resume = a Google Drive "anyone with the link" URL. Open external links in a new tab with `rel="noopener noreferrer"`; reuse `data-avatar-react` so the avatar reacts on hover. Inline the GitHub/LinkedIn SVG icons — ask before adding an icon library.
+- **Hero background animation.** Keep it subtle so it never competes with the avatar (the centerpiece) or hurts text contrast; it sits *behind* content and the sticky avatar lane (mind z-index). Respect `prefers-reduced-motion` (static fallback). Reference reactbits.dev for ideas, but prefer a lightweight CSS/canvas/GSAP effect — **ask before adding a dependency** (e.g. three/OGL).
+- **About as a terminal UI.** Reskin the existing About content as a console: monospace (`--font-mono`/Geist Mono is already loaded), window chrome (traffic-light dots), a prompt, optionally typed-out lines. Gate any typing animation on `prefers-reduced-motion` (show full text if reduced). Keep it real, accessible content — not decoration.
+- **Light-mode toggle.** Groundwork is already in place: class-based dark mode (`@variant dark` in `globals.css`) with light tokens defined, and `<html>` defaults to `class="dark"`. Add a client toggle that flips `.dark` on `<html>`, persists to `localStorage`, and initializes from the saved value or `prefers-color-scheme`. Avoid FOUC with a tiny inline script in `layout.tsx` that sets the class before paint. **Check the avatar in light mode** — the light circular backdrop and the figure's black hair/outlines assume a dark page and may need adjusting.
 
 ---
 
