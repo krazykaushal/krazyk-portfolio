@@ -107,6 +107,7 @@ export default function Avatar({ className }: AvatarProps) {
           svgOrigin: "348 458",
           duration: 0.5,
           ease: "power2.out",
+          overwrite: "auto",
         },
         0,
       )
@@ -118,6 +119,7 @@ export default function Avatar({ className }: AvatarProps) {
           svgOrigin: "348 458",
           duration: 0.7,
           ease: "power1.inOut",
+          overwrite: "auto",
         },
         0.9,
       )
@@ -142,7 +144,8 @@ export default function Avatar({ className }: AvatarProps) {
   useGSAP(() => {
     const figure = figureRef.current;
     const eyes = eyesRef.current;
-    if (!figure || !eyes) return;
+    const head = headRef.current;
+    if (!figure || !eyes || !head) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     // Breathing: the whole figure gently swells from its base, forever.
@@ -175,8 +178,36 @@ export default function Avatar({ className }: AvatarProps) {
     };
     scheduleBlink();
 
-    // The breathing tween is reverted by useGSAP; stop the blink loop ourselves.
-    return () => next?.kill();
+    // Fidget: every so often, a subtle head tilt to a random small angle and
+    // back, so the avatar shifts/looks around when idle. overwrite: "auto" hands
+    // the head off cleanly with the scroll reaction.
+    let fidget: gsap.core.Tween | undefined;
+    const scheduleFidget = () => {
+      fidget = gsap.delayedCall(gsap.utils.random(6, 11), () => {
+        gsap
+          .timeline()
+          .to(head, {
+            rotation: gsap.utils.random(-4, 4),
+            svgOrigin: "348 458",
+            duration: 0.9,
+            ease: "power1.inOut",
+            overwrite: "auto",
+          })
+          .to(
+            head,
+            { rotation: 0, duration: 1, ease: "power1.inOut", overwrite: "auto" },
+            "+=0.7",
+          );
+        scheduleFidget();
+      });
+    };
+    scheduleFidget();
+
+    // The breathing tween is reverted by useGSAP; stop the loops ourselves.
+    return () => {
+      next?.kill();
+      fidget?.kill();
+    };
   });
 
   // Hover reaction: when the cursor is over an interactive element (any element
