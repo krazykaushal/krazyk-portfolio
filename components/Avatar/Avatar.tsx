@@ -23,6 +23,35 @@ export default function Avatar({ className }: AvatarProps) {
   // The <svg> element itself; spun/booped by the click easter egg.
   const svgRef = useRef<SVGSVGElement>(null);
 
+  // Intro: on first load the avatar pops in, then gives a quick greeting
+  // (head tilt + eyebrow raise) and settles. gsap.from runs in useGSAP's
+  // layout effect (before paint), so there's no flash of the full avatar.
+  useGSAP(() => {
+    const svg = svgRef.current;
+    const head = headRef.current;
+    const brows = browsRef.current;
+    if (!svg || !head || !brows) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    gsap
+      .timeline()
+      .from(svg, {
+        scale: 0.6,
+        opacity: 0,
+        duration: 0.7,
+        ease: "back.out(1.6)",
+        transformOrigin: "center",
+      })
+      .to(
+        head,
+        { rotation: -7, svgOrigin: "348 458", duration: 0.4, ease: "power2.out" },
+        "-=0.15",
+      )
+      .to(brows, { y: -6, duration: 0.3, ease: "power2.out" }, "<")
+      .to(head, { rotation: 0, duration: 0.6, ease: "power1.inOut" }, ">0.1")
+      .to(brows, { y: 0, duration: 0.4, ease: "power1.inOut" }, "<");
+  });
+
   useGSAP(() => {
     const eyes = eyesRef.current;
     if (!eyes) return;
