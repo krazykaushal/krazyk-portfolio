@@ -18,6 +18,8 @@ export default function Avatar({ className }: AvatarProps) {
   const headRef = useRef<SVGGElement>(null);
   // The eyebrows; raised during the reaction.
   const browsRef = useRef<SVGGElement>(null);
+  // The whole figure; gently scaled for the idle breathing loop.
+  const figureRef = useRef<SVGGElement>(null);
 
   useGSAP(() => {
     const eyes = eyesRef.current;
@@ -94,6 +96,48 @@ export default function Avatar({ className }: AvatarProps) {
     return () => triggers.forEach((t) => t.kill());
   });
 
+  // Idle: a gentle breathing loop + occasional blink so the avatar feels alive
+  // when nothing else is happening. Runs underneath cursor tracking.
+  useGSAP(() => {
+    const figure = figureRef.current;
+    const eyes = eyesRef.current;
+    if (!figure || !eyes) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Breathing: the whole figure gently swells from its base, forever.
+    gsap.to(figure, {
+      scale: 1.02,
+      svgOrigin: "348 578",
+      duration: 2.8,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+    });
+
+    // Blink: a quick vertical squash of the eyes (default origin = center).
+    const blink = () =>
+      gsap.to(eyes, {
+        scaleY: 0.1,
+        duration: 0.08,
+        ease: "power2.inOut",
+        repeat: 1,
+        yoyo: true,
+      });
+
+    // Re-blink at random intervals, rescheduling after each one.
+    let next: gsap.core.Tween | undefined;
+    const scheduleBlink = () => {
+      next = gsap.delayedCall(gsap.utils.random(2, 6), () => {
+        blink();
+        scheduleBlink();
+      });
+    };
+    scheduleBlink();
+
+    // The breathing tween is reverted by useGSAP; stop the blink loop ourselves.
+    return () => next?.kill();
+  });
+
   return (
     // Cropped to the figure's bounding box (was "0 0 687 687"); the export had
     // a wide empty margin that made the figure render small.
@@ -105,7 +149,7 @@ export default function Avatar({ className }: AvatarProps) {
       role="img"
       aria-label="Illustrated avatar of Kaushal Patel"
     >
-      <g id="Base_avatar">
+      <g id="Base_avatar" ref={figureRef}>
         <g id="Clothes">
           <g id="Hoodie">
             <path
