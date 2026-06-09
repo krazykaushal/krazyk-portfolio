@@ -123,6 +123,7 @@ export default function ContactForm() {
 
       <button
         type="submit"
+        data-avatar-react
         disabled={status === "submitting"}
         className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
       >
