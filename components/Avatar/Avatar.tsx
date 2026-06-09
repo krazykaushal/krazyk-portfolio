@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { gsap, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 
 type AvatarProps = {
   className?: string;
@@ -14,6 +14,10 @@ export default function Avatar({ className }: AvatarProps) {
   // The group holding both eyes + their glints. We translate it toward the
   // cursor for a subtle "looking at you" effect.
   const eyesRef = useRef<SVGGElement>(null);
+  // The whole head (skin + mouth + eyes + hair); rotated for the head tilt.
+  const headRef = useRef<SVGGElement>(null);
+  // The eyebrows; raised during the reaction.
+  const browsRef = useRef<SVGGElement>(null);
 
   useGSAP(() => {
     const eyes = eyesRef.current;
@@ -49,6 +53,45 @@ export default function Avatar({ className }: AvatarProps) {
     // useGSAP reverts the quickTo tweens automatically; this returned cleanup
     // (invoked by the gsap context on unmount) removes our window listener.
     return () => window.removeEventListener("mousemove", onMove);
+  });
+
+  // "point" reaction: when a section scrolls into view, tilt the head toward
+  // the content (on the left) and raise the eyebrows, then settle to neutral.
+  useGSAP(() => {
+    const head = headRef.current;
+    const brows = browsRef.current;
+    if (!head || !brows) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Build the pose once, paused; we replay it on each section enter.
+    // svgOrigin sets the rotation pivot in SVG user units — here, the neck.
+    const react = gsap
+      .timeline({ paused: true })
+      .to(
+        head,
+        { rotation: -6, svgOrigin: "348 458", duration: 0.5, ease: "power2.out" },
+        0,
+      )
+      .to(brows, { y: -6, duration: 0.4, ease: "power2.out" }, 0)
+      .to(
+        head,
+        { rotation: 0, svgOrigin: "348 458", duration: 0.7, ease: "power1.inOut" },
+        0.9,
+      )
+      .to(brows, { y: 0, duration: 0.5, ease: "power1.inOut" }, 0.9);
+
+    // One ScrollTrigger per section; replay the reaction whenever one enters.
+    const triggers = ["#about", "#work", "#skills", "#contact"].map((sel) =>
+      ScrollTrigger.create({
+        trigger: sel,
+        start: "top 70%",
+        onEnter: () => react.restart(),
+        onEnterBack: () => react.restart(),
+      }),
+    );
+
+    // useGSAP reverts the timeline; kill the ScrollTriggers we made by hand.
+    return () => triggers.forEach((t) => t.kill());
   });
 
   return (
@@ -122,6 +165,7 @@ export default function Avatar({ className }: AvatarProps) {
             />
           </g>
         </g>
+        <g ref={headRef}>
         <g id="Skin/Skin 1">
           <g id="Base">
             <path
@@ -195,6 +239,7 @@ export default function Avatar({ className }: AvatarProps) {
         </g>
         <g id="Eyes">
           <g id="Clear Eyes">
+            <g ref={browsRef}>
             <path
               id="Left Eyebrow"
               d="M293.098 246.382C291.981 246.382 290.929 245.673 290.564 244.557C290.092 243.161 290.843 241.637 292.239 241.165C311.647 234.595 324.034 239.426 324.549 239.64C325.923 240.199 326.589 241.766 326.031 243.14C325.472 244.514 323.927 245.179 322.553 244.621C322.36 244.535 311.282 240.392 293.956 246.253C293.677 246.339 293.377 246.403 293.098 246.403V246.382Z"
@@ -205,6 +250,7 @@ export default function Avatar({ className }: AvatarProps) {
               d="M406.002 245.587C405.766 245.587 405.508 245.566 405.272 245.48C387.603 240.499 376.74 245.287 376.632 245.33C375.28 245.952 373.691 245.33 373.069 243.999C372.446 242.667 373.026 241.079 374.378 240.456C374.894 240.22 387.002 234.746 406.732 240.306C408.149 240.714 408.986 242.195 408.578 243.612C408.234 244.793 407.161 245.566 406.002 245.566V245.587Z"
               fill="black"
             />
+            </g>
             {/* Eyes + glints live in their own group so only they track the cursor
     (translated in the useGSAP hook above); eyebrows stay put. */}
             <g ref={eyesRef}>
@@ -243,6 +289,7 @@ export default function Avatar({ className }: AvatarProps) {
               fill="black"
             />
           </g>
+        </g>
         </g>
       </g>
       <defs>
