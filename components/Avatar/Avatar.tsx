@@ -22,6 +22,8 @@ export default function Avatar({ className }: AvatarProps) {
   const figureRef = useRef<SVGGElement>(null);
   // The <svg> element itself; spun/booped by the click easter egg.
   const svgRef = useRef<SVGSVGElement>(null);
+  // True while hovering an interactive element; pauses the idle head fidget.
+  const hoveringRef = useRef(false);
 
   // Intro: on first load the avatar pops in, then gives a quick greeting
   // (head tilt + eyebrow raise) and settles. gsap.from runs in useGSAP's
@@ -184,20 +186,28 @@ export default function Avatar({ className }: AvatarProps) {
     let fidget: gsap.core.Tween | undefined;
     const scheduleFidget = () => {
       fidget = gsap.delayedCall(gsap.utils.random(6, 11), () => {
-        gsap
-          .timeline()
-          .to(head, {
-            rotation: gsap.utils.random(-4, 4),
-            svgOrigin: "348 458",
-            duration: 0.9,
-            ease: "power1.inOut",
-            overwrite: "auto",
-          })
-          .to(
-            head,
-            { rotation: 0, duration: 1, ease: "power1.inOut", overwrite: "auto" },
-            "+=0.7",
-          );
+        // skip while hovering — the head is already leaning toward content
+        if (!hoveringRef.current) {
+          gsap
+            .timeline()
+            .to(head, {
+              rotation: gsap.utils.random(-4, 4),
+              svgOrigin: "348 458",
+              duration: 0.9,
+              ease: "power1.inOut",
+              overwrite: "auto",
+            })
+            .to(
+              head,
+              {
+                rotation: 0,
+                duration: 1,
+                ease: "power1.inOut",
+                overwrite: "auto",
+              },
+              "+=0.7",
+            );
+        }
         scheduleFidget();
       });
     };
@@ -215,26 +225,45 @@ export default function Avatar({ className }: AvatarProps) {
   // on leave. The eyes are already looking that way via cursor tracking.
   useGSAP(() => {
     const brows = browsRef.current;
-    if (!brows) return;
+    const head = headRef.current;
+    if (!brows || !head) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const els = gsap.utils.toArray<HTMLElement>("[data-avatar-react]");
     // overwrite: "auto" lets enter/leave (and the scroll reaction) hand off the
-    // eyebrows cleanly instead of stacking competing tweens.
-    const enter = () =>
+    // head + eyebrows cleanly instead of stacking competing tweens.
+    const enter = () => {
+      hoveringRef.current = true; // pause the idle fidget while leaning
       gsap.to(brows, {
         y: -8,
         duration: 0.25,
         ease: "power2.out",
         overwrite: "auto",
       });
-    const leave = () =>
+      // lean the head toward the content (always to the left of the avatar)
+      gsap.to(head, {
+        rotation: -5,
+        svgOrigin: "348 458",
+        duration: 0.35,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
+    const leave = () => {
+      hoveringRef.current = false;
       gsap.to(brows, {
         y: 0,
         duration: 0.3,
         ease: "power2.out",
         overwrite: "auto",
       });
+      gsap.to(head, {
+        rotation: 0,
+        duration: 0.4,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
 
     els.forEach((el) => {
       el.addEventListener("mouseenter", enter);
