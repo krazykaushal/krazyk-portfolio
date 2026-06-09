@@ -15,8 +15,7 @@ export default function Hero() {
       </h1>
 
       <p className="mt-4 max-w-md text-base text-muted sm:text-lg">
-        {/* TODO(you): replace with your actual tagline */}
-        Software engineer. Problem solver. Creative thinker.
+        Software Engineer | AI/ML &amp; Full Stack
       </p>
 
       <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
