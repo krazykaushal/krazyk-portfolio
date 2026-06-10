@@ -223,6 +223,8 @@ export default function Avatar({ className }: AvatarProps) {
   // Hover reaction: when the cursor is over an interactive element (any element
   // tagged data-avatar-react), the avatar perks up its eyebrows, relaxing them
   // on leave. The eyes are already looking that way via cursor tracking.
+  // The social-rail links carry data-avatar-react="rail" and get a bigger,
+  // playful "look over" instead of the subtle perk — we branch on that value.
   useGSAP(() => {
     const brows = browsRef.current;
     const head = headRef.current;
@@ -232,8 +234,35 @@ export default function Avatar({ className }: AvatarProps) {
     const els = gsap.utils.toArray<HTMLElement>("[data-avatar-react]");
     // overwrite: "auto" lets enter/leave (and the scroll reaction) hand off the
     // head + eyebrows cleanly instead of stacking competing tweens.
-    const enter = () => {
+    const enter = (e: Event) => {
       hoveringRef.current = true; // pause the idle fidget while leaning
+      const el = e.currentTarget as HTMLElement;
+
+      // dataset reads the attribute's value: "rail" for the social rail, "" for
+      // a bare data-avatar-react (hero CTAs, project cards). Branch on it.
+      if (el.dataset.avatarReact === "rail") {
+        // Deliberate "look over": turn the head toward the rail (on the
+        // avatar's right) so it visibly turns to look at the link.
+        gsap.to(head, {
+          rotation: 9,
+          svgOrigin: "348 458",
+          duration: 0.4,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+        // ...and give a quick curious eyebrow waggle that settles raised.
+        // keyframes steps `y` through each value in sequence in one tween.
+        gsap.to(brows, {
+          keyframes: [
+            { y: -10, duration: 0.15, ease: "power2.out" },
+            { y: -3, duration: 0.13 },
+            { y: -9, duration: 0.18 },
+          ],
+          overwrite: "auto",
+        });
+        return;
+      }
+
       gsap.to(brows, {
         y: -8,
         duration: 0.25,

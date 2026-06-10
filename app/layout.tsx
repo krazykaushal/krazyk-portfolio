@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,17 +57,33 @@ export const metadata: Metadata = {
   },
 };
 
+// Runs before first paint (a blocking inline <script>, mounted below): set the
+// .dark class from the saved choice, falling back to the OS preference. Inline
+// scripts block parsing, so the class is correct before anything paints — no
+// flash of the wrong theme (FOUC). To always default new visitors to dark
+// regardless of their OS, swap the matchMedia(...) call for `true`.
+const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
+    // suppressHydrationWarning: the script below mutates this element's class
+    // before React hydrates, so the server-rendered class and the live DOM can
+    // differ on <html>. This silences the warning for this one node only.
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-background text-foreground">{children}</body>
+      <body className="min-h-full bg-background text-foreground">
+        {/* Pre-paint theme script — must run before the body content renders. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <ThemeToggle />
+        {children}
+      </body>
     </html>
   );
 }
