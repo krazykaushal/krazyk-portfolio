@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import Cursor from "@/components/ui/Cursor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -82,6 +83,7 @@ export default function RootLayout({
         {/* Pre-paint theme script — must run before the body content renders. */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeToggle />
+        <Cursor />
         {children}
       </body>
     </html>
