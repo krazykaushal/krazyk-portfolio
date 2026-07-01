@@ -7,6 +7,7 @@ import Reveal from "@/components/ui/Reveal";
 import Avatar from "@/components/Avatar/Avatar";
 import SocialLinks from "@/components/ui/SocialLinks";
 import HeroBackground from "@/components/ui/HeroBackground";
+import Footer from "@/components/ui/Footer";
 
 export default function Home() {
   return (
@@ -67,6 +68,9 @@ export default function Home() {
           </Reveal>
         </div>
       </main>
+
+      {/* Site footer — outside <main> so it's full-width and its own landmark. */}
+      <Footer />
     </>
   );
 }
