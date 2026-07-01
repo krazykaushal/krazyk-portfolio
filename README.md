@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# krazyk-portfolio
 
-## Getting Started
+Personal portfolio for **Kaushal Patel** — Software Engineer (AI/ML & Full Stack).
 
-First, run the development server:
+The centerpiece is a **rigged 2D avatar** that reacts to the visitor: its eyes
+track the cursor, it tilts toward each section as it scrolls into view, perks up
+over interactive elements, and has a click easter egg. Everything else is built
+to keep that avatar feeling alive.
+
+<!-- TODO(you): add the production URL once you're happy with it. -->
+🔗 **Live:** _coming soon_
+
+## Tech
+
+- **Framework:** Next.js (App Router, TypeScript, Turbopack)
+- **Styling:** Tailwind CSS v4 — CSS-first `@theme` tokens, class-based dark mode
+- **Animation:** GSAP + ScrollTrigger, SplitText, ScrambleText via `@gsap/react` (`useGSAP`)
+- **Avatar:** hand-layered inline SVG, each group animated independently by ref
+- **Hosting:** Vercel
+
+## Features
+
+- Cursor-tracking avatar with idle breathing, random blinks, hover/scroll reactions, and a click easter egg
+- Custom dot-and-ring cursor that grows over interactive elements
+- Terminal-style About section that types itself out on scroll
+- Animated hero text intro (char stagger + scramble) and an ambient drifting-grid background
+- Persisted light/dark toggle with no flash of the wrong theme
+- Mobile-first and `prefers-reduced-motion`-aware throughout
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Other scripts:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build    # production build
+npm run start    # serve the production build
+npm run lint     # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Environment
 
-## Learn More
+Set the keys you need in `.env.local` (none are committed):
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` | Contact-form submissions (Web3Forms) |
+| `NEXT_PUBLIC_RESUME_URL` | Résumé link in the social rail (omitted if unset) |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for SEO / Open Graph metadata (optional) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The **code** in this repository is licensed under the [MIT License](LICENSE) —
+feel free to read it, learn from it, and reuse the implementation.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The **content** is not. The copy, project descriptions, and especially the
+avatar artwork (an original likeness of the author) are **© Kaushal Patel, all
+rights reserved**, and fall outside the MIT grant. Please don't reproduce them
+without permission.
