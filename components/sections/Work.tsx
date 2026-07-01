@@ -10,13 +10,13 @@ type Project = {
 };
 
 const projects: Project[] = [
-  {
-    name: "Krazy-Anime",
-    desc: "Web app to stream anime",
-    tech: ["Next.js", "Tailwind", "React Query"],
-    repo: "https://github.com/krazykaushal/krazy_anime_stream",
-    link: "https://krazy-anime-stream.vercel.app/",
-  },
+  // {
+  //   name: "Krazy-Anime",
+  //   desc: "Web app to stream anime",
+  //   tech: ["Next.js", "Tailwind", "React Query"],
+  //   repo: "https://github.com/krazykaushal/krazy_anime_stream",
+  //   link: "https://krazy-anime-stream.vercel.app/",
+  // },
   {
     name: "DA-SH",
     desc: "Educational networking tool for college students",
@@ -31,16 +31,16 @@ const projects: Project[] = [
     repo: "https://github.com/krazykaushal/Purveying-Fee-KrazyK",
   },
   {
-    name: "Zoo-B-DB",
-    desc: "SQL database management system for zoos and national parks",
-    tech: ["React", "Express", "PostgreSQL", "Node"],
-    repo: "https://github.com/krazykaushal/Zoo-B-DB",
-  },
-  {
     name: "Promptopia",
     desc: "Open-source AI prompting tool to discover, create, and share creative prompts",
     tech: ["Next.js", "Tailwind"],
     repo: "https://github.com/krazykaushal/Promptopia",
+  },
+  {
+    name: "Zoo-B-DB",
+    desc: "SQL database management system for zoos and national parks",
+    tech: ["React", "Express", "PostgreSQL", "Node"],
+    repo: "https://github.com/krazykaushal/Zoo-B-DB",
   },
 ];
 
