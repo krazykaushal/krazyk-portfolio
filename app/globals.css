@@ -32,6 +32,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Smooth-scroll anchor jumps (the hero's "See my work" / "Get in touch" CTAs →
+   #work / #contact, and any future in-page link). Native + dependency-free.
+   The reduced-motion block below resets this to `auto`, so motion-sensitive
+   visitors get an instant jump instead. */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
