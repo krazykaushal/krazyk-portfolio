@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Tailwind v4 is CSS-first: plugins are loaded here with @plugin, not listed in
+   a tailwind.config.js `plugins` array (there is no config file in v4). This one
+   gives us the `prose` class for long-form post bodies. It must come after the
+   @import above. https://github.com/tailwindlabs/tailwindcss-typography */
+@plugin "@tailwindcss/typography";
+
 /* Class-based dark mode: the .dark class on <html> activates dark: variants */
 @variant dark (&:where(.dark, .dark *));
 
@@ -71,3 +77,57 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Long-form post bodies — the `prose` class from @tailwindcss/typography.
+
+   The plugin styles raw Markdown output (headings, lists, blockquotes, code,
+   tables) via a set of --tw-prose-* custom properties. Overriding those
+   properties is the supported way to recolor it, so we point them at OUR design
+   tokens instead of the plugin's grays.
+
+   Two things worth understanding here:
+
+   1. We do NOT need the `prose-invert` variant for dark mode. That variant
+      exists to swap in a second, lighter palette — but our tokens (--foreground,
+      --muted, --accent) already flip when .dark lands on <html>, so a single set
+      of var() references covers both themes. One rule, no duplication.
+
+   2. Specificity: the plugin registers `prose` inside Tailwind's utilities
+      @layer. This rule is unlayered, and unlayered CSS always beats layered CSS
+      in the cascade — which is why a plain `.prose` selector wins here without
+      !important.
+
+   TODO(you): two worked examples are below. Fill in the rest as you find things
+   that look off against the site — the full list of properties is in the plugin
+   README. The ones that matter next: --tw-prose-links, --tw-prose-bold,
+   --tw-prose-quotes, --tw-prose-quote-borders, --tw-prose-code,
+   --tw-prose-hr, --tw-prose-counters, --tw-prose-bullets.
+   --------------------------------------------------------------------------- */
+.prose {
+  /* Body copy sits at --muted rather than --foreground: full-contrast text for
+     a whole article reads as heavy, and it lets headings pop without needing a
+     bigger size jump. */
+  --tw-prose-body: var(--muted);
+  --tw-prose-headings: var(--foreground);
+}
+
+/* Shiki's dual-theme output. Because astro.config.mjs sets `themes` (plural),
+   every code block ships the light colors as real CSS and the dark colors as
+   --shiki-dark* custom properties. This rule is what actually swaps them under
+   our class-based dark mode.
+
+   TODO(you): uncomment and check a code block in both themes. The !important is
+   load-bearing — Shiki writes its colors as inline styles on every token span,
+   and inline styles outrank everything except !important.
+   https://docs.astro.build/en/guides/syntax-highlighting/
+
+.dark .astro-code,
+.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+*/

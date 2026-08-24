@@ -1,0 +1,66 @@
+---
+title: 'Porting a portfolio from Next.js to Astro'
+description: 'What changed, what got simpler, and the one whitespace gotcha that cost me twenty minutes.'
+pubDate: 2026-08-24
+tags: ['astro', 'react', 'notes']
+draft: false
+---
+
+import SocialLinks from '@/components/ui/SocialLinks.astro';
+
+This site used to be a Next.js App Router app. It now runs on Astro, and the
+diff was smaller than I expected — most of the work was deciding which
+components actually needed React.
+
+## The rule I landed on
+
+Reaching for a React island only pays off when React is doing real work:
+component state driving re-renders, or reconciliation. Refs plus DOM plus GSAP
+is not enough of a reason — that is what a plain Astro `<script>` tag is for.
+
+Applying that rule moved four components off React entirely:
+
+- the custom cursor — refs and window listeners, no state
+- the hero background canvas — `requestAnimationFrame`, no state
+- the theme toggle — flips a class, and the UI is pure CSS
+- the scroll-reveal wrapper — wraps children through a slot
+
+Which leaves React for the avatar, the hero timeline, and the two components
+with genuine `useState`: the typing terminal and the contact form.
+
+## Hydration moved to the call site
+
+In Next, a component declared its own environment with `'use client'` at the
+top of the file. In Astro the component stays neutral and the *usage* decides:
+
+```astro
+<Hero client:load />
+<About client:visible={{ rootMargin: '200px' }} />
+```
+
+That reads better than it sounds. The same component can be static on one page
+and interactive on another, and the laziest directive that still feels right is
+usually the correct one.
+
+## The gotcha
+
+Astro strips whitespace that is only a newline plus indentation between text
+and an adjacent tag. So this renders without a space before the link:
+
+```astro
+<p>
+  Released under the MIT
+  <a href="/license">license</a>
+</p>
+```
+
+The fix is to make the space explicit with a `{' '}` expression. Twenty minutes
+of staring at a missing space, and now it is in the project notes so I never
+lose them to it again.
+
+> Worth saying plainly: none of this made the site faster in a way a visitor
+> would notice. The static sections shipping zero JavaScript is just satisfying.
+
+## Find me elsewhere
+
+<SocialLinks class="mt-6 justify-center" />

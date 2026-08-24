@@ -10,7 +10,9 @@ A personal portfolio website built around a **rigged 2D avatar** of the owner th
 
 **Tech:** Astro (static output, **TypeScript**) with **React islands** + **Tailwind CSS v4** + GSAP (with ScrollTrigger) for animation, layered SVG for the avatar. Import alias is `@/*` (maps to `src/`).
 
-> **Companion file:** `AGENTS.md` holds up-to-date Astro conventions for coding agents. Treat it as authoritative for Astro framework idioms and follow it alongside this file. This CLAUDE.md owns the _project intent, working agreement, and avatar design_; AGENTS.md owns _framework specifics_.
+There is also a **blog**: MDX posts in an Astro content collection, at `/blog`.
+
+> **Companion files:** `AGENTS.md` holds up-to-date Astro conventions for coding agents. Treat it as authoritative for Astro framework idioms and follow it alongside this file. `BLOG.md` is the blog build sheet — the per-file spec for the parts of the blog that are still `TODO(you)`. This CLAUDE.md owns the _project intent, working agreement, and avatar design_; AGENTS.md owns _framework specifics_.
 
 **History:** this started life as a Next.js App Router app (see `../krazyk-portfolio`) and was ported to Astro. The mapping table below is the record of that port — consult it before assuming how something used to work.
 
@@ -56,18 +58,27 @@ Confirm these against package.json before relying on them; update this file if t
 
 ```
 src/
+  content.config.ts      # the `blog` content collection: glob loader + Zod schema
+  content/
+    blog/                # posts as .mdx; the filename is the slug
+      hello-world.mdx
+      _TEMPLATE.mdx      # frontmatter reference; `_` prefix keeps it out of the collection
   pages/
-    index.astro          # the single long-scroll home page (file-based routing: this is `/`)
+    index.astro          # the long-scroll home page (file-based routing: this is `/`)
+    blog/                # TODO(you) — index.astro, [...slug].astro, tags/[tag].astro
+    rss.xml.ts           # TODO(you) — the feed endpoint
   layouts/
     Layout.astro         # <html>/<head> shell: meta tags, fonts, pre-paint theme script
   components/
     Avatar/              # the rigged avatar (React island)
       Avatar.tsx         # layered SVG, exposes refs for animatable parts
       avatar-source.svg  # source art (Figma export); not imported at runtime
+    blog/                # TODO(you) — PostCard.astro and friends
     sections/
       Hero.tsx           # island — GSAP text intro
       About.tsx          # island — terminal typing state machine
       Work.astro         # static
+      Writing.astro      # TODO(you) — static; latest-posts teaser
       Skills.astro       # static
       Contact.astro      # static shell around the form island
       ContactForm.tsx    # island — form state
@@ -75,10 +86,12 @@ src/
       Cursor.astro       # dot + ring follower (<script>)
       Footer.astro
       HeroBackground.astro # drifting grid canvas (<script>)
+      Nav.astro          # TODO(you) — fixed header nav; hosts ThemeToggle
       Reveal.astro       # scroll-in wrapper via <slot /> (<script>)
       SocialLinks.astro
       ThemeToggle.astro
   lib/
+    blog.ts              # post queries + date/reading-time formatting
     gsap.ts              # registers ScrollTrigger/SplitText/ScrambleText — React-free
     gsap-react.ts        # adds useGSAP on top; for islands only
   styles/
@@ -207,6 +220,7 @@ Phases 0–6 were completed on the Next.js version; the feature set carried over
 - [ ] **Deploy the Astro build** to Vercel and compare against the Next deployment.
 - [ ] **Lighthouse pass** — the Next version scored 100/100/100/100 desktop, 99/100/100/100 mobile. Re-measure; the static sections now ship no JS at all, so it should hold or improve.
 - [ ] **OG image** — decide the approach (see the open item above).
+- [ ] **Blog** — MDX posts in a content collection. Scaffolding (collection config, schema, seed post, lib stubs, typography plugin, `BLOG.md` spec) is in; the routes and components are `TODO(you)` — work through `BLOG.md` in order.
 - [ ] **Linting** — `astro check` covers types only. `eslint-plugin-astro` would restore the ESLint layer; a dependency, so ask first.
 
 ---
@@ -221,5 +235,7 @@ Phases 0–6 were completed on the Next.js version; the feature set carried over
 - Module scripts are deferred, so the DOM is fully parsed when they run — including island markup, which Astro server-renders before hydrating the same nodes in place. That's why `Cursor.astro` can find `[data-avatar-react]` elements that live inside islands.
 - Islands don't share React state with each other. Anything cross-island travels through the DOM or an event — plan for that before splitting a stateful feature across two islands.
 - Watch GSAP double-mounting in React StrictMode — `useGSAP` handles cleanup; verify animations don't stack.
+- **The content schema is the source of truth for post types.** `CollectionEntry<'blog'>` is generated from the Zod schema in `src/content.config.ts` — change the schema, not a hand-written type. A bad frontmatter key fails the build, which is the point.
+- **In `.mdx`, `<` and `{` are JSX syntax**, not text. Wrap them in backticks when you mean them literally, and use `{/* ... */}` for comments (an HTML comment would ship to the browser).
 - Don't put real contact details or secrets in the repo.
 - Update this file when conventions, commands, or structure change. A stale CLAUDE.md is worse than none.

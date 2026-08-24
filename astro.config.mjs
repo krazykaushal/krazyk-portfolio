@@ -5,6 +5,7 @@ import { loadEnv } from "vite";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
 
 // This config file runs before Astro wires up `import.meta.env`, so we load the
 // .env files ourselves. Vite's loadEnv also merges in real process env vars, so
@@ -46,9 +47,30 @@ export default defineConfig({
     },
   ],
 
+  // Markdown/MDX rendering options. Astro ships Shiki for code highlighting
+  // with no extra dependency; `themes` (plural) makes it emit BOTH palettes in
+  // one pass — the light colors as real CSS, the dark ones as `--shiki-dark-*`
+  // custom properties. That pairs with our class-based dark mode: one flip of
+  // .dark on <html> swaps the code colors with no JS and no second render.
+  // MDX inherits this config, so `.mdx` posts get it for free.
+  // https://docs.astro.build/en/guides/syntax-highlighting/
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: "github-light",
+        dark: "github-dark",
+      },
+    },
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },
 
-  integrations: [react()],
+  // Order matters here: mdx() comes *after* react() so that by the time MDX
+  // sets up its JSX pipeline, the React renderer is already registered — that
+  // is what lets a .mdx post import a React island and hydrate it with a
+  // client:* directive, exactly like a page would.
+  // https://docs.astro.build/en/guides/integrations-guide/mdx/
+  integrations: [react(), mdx()],
 });
