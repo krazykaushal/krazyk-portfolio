@@ -1,0 +1,49 @@
+---
+// The home-page teaser for the blog: the three newest posts, then out to /blog.
+//
+// Same shape as Work.astro — a section, an h2, a grid of cards — so the blog
+// doesn't read as bolted on. Fully static: no state, no browser events, so this
+// ships zero JavaScript. The avatar's reactions still work, because they come
+// from `data-avatar-react` on the cards, which is markup, not script.
+import PostCard from '@/components/blog/PostCard.astro';
+import { getPublishedPosts } from '@/lib/blog';
+
+// Reading the collection in frontmatter means this query runs at build time and
+// what ships is plain HTML — there's no fetch, no loading state, no client.
+const LATEST_COUNT = 3;
+const posts = (await getPublishedPosts()).slice(0, LATEST_COUNT);
+---
+
+{
+  /* Render nothing at all when there are no posts. An <h2>Writing</h2> above an
+     empty grid reads as a broken section; a missing section reads as a site that
+     simply doesn't have that yet. Contrast with /blog, which DOES need an empty
+     state — you navigated there deliberately, so silence would look like a 404. */
+  posts.length > 0 && (
+    <section id="writing" class="px-6 py-24 md:px-16 lg:px-24">
+      {/* baseline-aligned so the small link sits on the h2's baseline rather
+          than centered against a much taller box */}
+      <div class="flex flex-wrap items-baseline justify-between gap-4">
+        {/* h2, not h1 — Hero owns the page's only h1. That's also why the cards
+            below get headingLevel={3}: h1 → h2 → h3, no level skipped. */}
+        <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Writing
+        </h2>
+
+        <a
+          href="/blog"
+          data-avatar-react
+          class="font-mono text-sm text-accent transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          Read all →
+        </a>
+      </div>
+
+      <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        {posts.map((post) => (
+          <PostCard post={post} headingLevel={3} />
+        ))}
+      </ul>
+    </section>
+  )
+}
