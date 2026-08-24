@@ -4,7 +4,14 @@ The working agreement in `CLAUDE.md` applies: **you write every `.astro` and
 `.tsx` file below.** This document is the spec — the file, its job, the exact
 APIs it needs, and how to know it's done.
 
-Phase A (config, types, seed content, spec) is committed. Phase B is yours.
+**Status: complete.** Steps 0–7 all shipped — see the commits from
+`feat: scaffold MDX blog collection` through `feat: add site nav and RSS feed`.
+Step 0 (the `src/lib/blog.ts` helpers) was written by the owner; Steps 1-7 were
+implemented on request, each one committed on its own.
+
+What's left of this document that still matters is **"Explicitly out of scope"**
+at the bottom: those are decisions, and they're the reason none of it gets
+re-litigated the next time the blog grows.
 
 ---
 
