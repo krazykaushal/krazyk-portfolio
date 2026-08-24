@@ -1,13 +1,8 @@
 // Shared blog helpers. This is the `src/lib` half of the convention in
 // CLAUDE.md: logic that more than one component needs lives here, so the
 // components stay about markup.
-//
-// PAIRING NOTE: `formatPostDate` below is written out as the worked example —
-// read it, then implement the four `TODO(you)` functions underneath it. Each
-// stub throws, so if a component calls one before it's implemented you get a
-// loud error instead of a silently blank page.
 
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry } from "astro:content";
 
 /**
  * One blog post entry, typed from the schema in `src/content.config.ts`.
@@ -20,7 +15,7 @@ import type { CollectionEntry } from 'astro:content';
  * To get renderable HTML you call `render(entry)` from 'astro:content' in the
  * page, not here — rendering belongs to the component that displays it.
  */
-export type Post = CollectionEntry<'blog'>;
+export type Post = CollectionEntry<"blog">;
 
 /** Average adult reading speed, words per minute. Used by `readingTime`. */
 const WORDS_PER_MINUTE = 200;
@@ -39,46 +34,34 @@ const WORDS_PER_MINUTE = 200;
  * UTC would render the 23rd.
  */
 export function formatPostDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
   }).format(date);
 }
 
 /**
  * Every post that should be visible, newest first.
  *
- * TODO(you): implement.
- *   1. `import { getCollection } from 'astro:content'` at the top of this file.
- *   2. `await getCollection('blog')` gives you every entry, unsorted.
- *      getCollection also takes an optional filter callback — that's the
- *      idiomatic place to drop drafts.
- *   3. Hide drafts in production only: `import.meta.env.PROD` is `true` during
- *      `astro build` and `false` in `astro dev`, so you keep writing drafts
- *      locally and they never ship.
- *   4. Sort by `pubDate` descending. Dates subtract into a number, so
- *      `b.data.pubDate.valueOf() - a.data.pubDate.valueOf()` is your comparator.
- *      Careful: `Array.prototype.sort` mutates and returns the same array — fine
- *      here since getCollection hands us a fresh one.
- *
  * https://docs.astro.build/en/reference/modules/astro-content/#getcollection
  */
 export async function getPublishedPosts(): Promise<Post[]> {
-  throw new Error('TODO(you): implement getPublishedPosts in src/lib/blog.ts');
+  const blogPosts = await getCollection(
+    "blog",
+    (entry) => !import.meta.env.PROD || !entry.data.draft,
+  );
+
+  const sortedBlogPosts = blogPosts.toSorted(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
+  return sortedBlogPosts;
 }
 
 /**
  * Estimated read time in whole minutes, minimum 1.
  *
- * TODO(you): implement.
- *   1. `post.body` is the raw MDX source and is typed as possibly `undefined`
- *      (not every loader provides one), so start with `post.body ?? ''`.
- *   2. Count words: split on whitespace and drop empty strings.
- *      `text.split(/\s+/).filter(Boolean).length` is enough.
- *   3. Divide by WORDS_PER_MINUTE and `Math.ceil`, then `Math.max(1, ...)` so a
- *      two-line post doesn't read "0 min".
  *
  * Known imprecision, and why we're accepting it: `body` is the source, so
  * import lines, JSX tags and code fences all count as words. That inflates a
@@ -87,32 +70,24 @@ export async function getPublishedPosts(): Promise<Post[]> {
  * bothers you later, stripping lines matching /^import\s/ is a cheap 80% fix.
  */
 export function readingTime(post: Post): number {
-  throw new Error('TODO(you): implement readingTime in src/lib/blog.ts');
+  const body = post.body ?? "";
+  const wordCount = body.split(/\s+/).filter(Boolean).length;
+  const readTime = Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE));
+
+  return readTime;
 }
 
 /**
  * Every distinct tag across the given posts, alphabetically.
- *
- * TODO(you): implement.
- *   1. `posts.flatMap((post) => post.data.tags)` flattens every tag array into
- *      one list. (`tags` has `.default([])` in the schema, so it's never
- *      undefined and needs no guard — that's the default earning its keep.)
- *   2. `new Set(...)` dedupes; spread it back into an array.
- *   3. `.sort()` — the default comparator is fine for plain lowercase strings.
- *
  * This feeds the tag pages' `getStaticPaths`, so it decides which URLs exist.
  */
 export function allTags(posts: Post[]): string[] {
-  throw new Error('TODO(you): implement allTags in src/lib/blog.ts');
+  return [...new Set(posts.flatMap((post) => post.data.tags))].sort();
 }
 
 /**
  * The subset of `posts` carrying `tag`, order preserved.
- *
- * TODO(you): implement — a one-line `filter` with `Array.prototype.includes`.
- * Decide whether the match should be case-sensitive. Simplest defensible
- * answer: lowercase both sides, and treat lowercase tags as the convention.
  */
 export function postsByTag(posts: Post[], tag: string): Post[] {
-  throw new Error('TODO(you): implement postsByTag in src/lib/blog.ts');
+  return posts.filter((post) => post.data.tags.includes(tag));
 }

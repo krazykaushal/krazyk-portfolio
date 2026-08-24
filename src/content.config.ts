@@ -9,13 +9,13 @@
 // the TypeScript types come from — `CollectionEntry<'blog'>` is generated from it.
 //
 // https://docs.astro.build/en/guides/content-collections/
-import { defineCollection } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
 
 // `z` is Zod, the schema/validation library Astro bundles. It's also re-exported
 // from 'astro:content', but that re-export is marked for removal, so we import
 // from the stable path.
-import { z } from 'astro/zod';
+import { z } from "astro/zod";
 
 const blog = defineCollection({
   // The glob loader walks the filesystem and turns each matching file into an
@@ -26,7 +26,7 @@ const blog = defineCollection({
   // The `[^_]` in the pattern means "first character is not an underscore",
   // which is how we keep `_TEMPLATE.mdx` (and anything in a `_drafts/` folder)
   // out of the collection entirely.
-  loader: glob({ pattern: '**/[^_]*.mdx', base: './src/content/blog' }),
+  loader: glob({ pattern: "**/[^_]*.mdx", base: "./src/content/blog" }),
 
   // Passing a function (instead of a plain object) gives us Astro's `image()`
   // helper, which validates that a referenced image exists and hands back an
@@ -50,7 +50,10 @@ const blog = defineCollection({
         // `.default([])` means downstream code can always call post.data.tags.map
         // without a null check — the default is applied during validation, and
         // the generated type is `string[]`, not `string[] | undefined`.
-        tags: z.array(z.string()).default([]),
+        tags: z
+          .array(z.string())
+          .default([])
+          .transform((tags) => tags.map((t) => t.toLowerCase())),
 
         // Hidden from production builds, visible in `astro dev`. The filtering
         // itself lives in src/lib/blog.ts, not here.
@@ -62,8 +65,8 @@ const blog = defineCollection({
       // Validation beyond types: an image without alt text is an accessibility
       // bug, so make it a build error rather than a thing to remember.
       .refine((data) => !data.heroImage || !!data.heroImageAlt, {
-        message: 'heroImageAlt is required when heroImage is set',
-        path: ['heroImageAlt'],
+        message: "heroImageAlt is required when heroImage is set",
+        path: ["heroImageAlt"],
       }),
 });
 
