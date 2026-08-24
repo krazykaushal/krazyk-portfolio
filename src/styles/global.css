@@ -98,11 +98,10 @@ body {
       in the cascade — which is why a plain `.prose` selector wins here without
       !important.
 
-   TODO(you): two worked examples are below. Fill in the rest as you find things
-   that look off against the site — the full list of properties is in the plugin
-   README. The ones that matter next: --tw-prose-links, --tw-prose-bold,
-   --tw-prose-quotes, --tw-prose-quote-borders, --tw-prose-code,
-   --tw-prose-hr, --tw-prose-counters, --tw-prose-bullets.
+   Where a value needs to be a *faded* token (borders, rules, bullets) we use
+   color-mix() rather than adding a new token: `bg-foreground/10` in Tailwind is
+   doing the same thing under the hood, and this keeps one source of truth for
+   the color. `in oklab` is the perceptual space Tailwind itself mixes in.
    --------------------------------------------------------------------------- */
 .prose {
   /* Body copy sits at --muted rather than --foreground: full-contrast text for
@@ -110,6 +109,25 @@ body {
      bigger size jump. */
   --tw-prose-body: var(--muted);
   --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--muted);
+
+  /* Anything that should read as "this is the site's accent". */
+  --tw-prose-links: var(--accent);
+
+  /* Emphasis and quotes step UP to full contrast — that's what makes them read
+     as emphasis against --muted body copy. */
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-captions: var(--muted);
+  --tw-prose-counters: var(--muted);
+
+  /* Structural marks: present, never competing with the text. */
+  --tw-prose-quote-borders: color-mix(in oklab, var(--accent) 40%, transparent);
+  --tw-prose-bullets: color-mix(in oklab, var(--foreground) 30%, transparent);
+  --tw-prose-hr: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --tw-prose-th-borders: color-mix(in oklab, var(--foreground) 20%, transparent);
+  --tw-prose-td-borders: color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 /* Shiki's dual-theme output. Because astro.config.mjs sets `themes` (plural),
@@ -117,11 +135,11 @@ body {
    --shiki-dark* custom properties. This rule is what actually swaps them under
    our class-based dark mode.
 
-   TODO(you): uncomment and check a code block in both themes. The !important is
-   load-bearing — Shiki writes its colors as inline styles on every token span,
-   and inline styles outrank everything except !important.
-   https://docs.astro.build/en/guides/syntax-highlighting/
-
+   The !important is load-bearing — Shiki writes its colors as inline styles on
+   every token span, and inline styles outrank everything except !important.
+   That also means the light theme needs no rule at all: its inline styles are
+   already winning, and this block only overrides them under .dark.
+   https://docs.astro.build/en/guides/syntax-highlighting/ */
 .dark .astro-code,
 .dark .astro-code span {
   color: var(--shiki-dark) !important;
@@ -130,4 +148,3 @@ body {
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
-*/
