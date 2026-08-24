@@ -48,19 +48,8 @@ const count = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
       flow, closer to a post than to the /blog showcase. Keeping it this shape
       also avoids copying that shell a third time; see the note at the bottom of
       this file if you'd rather have the avatar here. */}
-  <main class="mx-auto w-full max-w-4xl px-6 py-16 sm:py-24">
-    {/* TODO(you): Step 6's Nav.astro replaces this. */}
-    <a
-      href="/blog"
-      data-avatar-react
-      class="font-mono text-sm text-muted transition-colors hover:text-foreground"
-    >
-      ← Writing
-    </a>
-
-    <h1
-      class="mt-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
-    >
+  <main class="mx-auto w-full max-w-4xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
       {heading}
     </h1>
 

@@ -14,14 +14,16 @@
 // zero hydration, and the "no hydration mismatch" concern disappears entirely.
 ---
 
-{/* Fixed in the corner (no nav bar to live in). z-50 keeps it above the
-    sticky avatar lane; the frosted surface bg keeps it legible over whatever
-    scrolls behind. h-11 meets the 44px touch-target minimum. */}
+{/* Positioning is Nav.astro's job — this used to be `fixed right-4 top-4 z-50`
+    back when there was no nav bar for it to live in. Now it's a plain inline
+    button and the bar places it, which is why it can be reused anywhere.
+    The frosted surface bg keeps it legible over whatever scrolls behind, and
+    h-11 meets the 44px touch-target minimum. */}
 <button
   type="button"
   data-theme-toggle
   aria-label="Toggle light and dark theme"
-  class="fixed right-4 top-4 z-50 inline-flex h-11 items-center gap-2 rounded-md border border-foreground/15 bg-surface/80 px-3 font-mono text-xs text-muted shadow-sm backdrop-blur transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+  class="inline-flex h-11 items-center gap-2 rounded-md border border-foreground/15 bg-surface/80 px-3 font-mono text-xs text-muted shadow-sm backdrop-blur transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
 >
   <span class="text-foreground">darkMode</span>
 

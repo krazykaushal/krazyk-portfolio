@@ -57,24 +57,14 @@ const minutes = readingTime(post);
       the mascot earns its space; a post is for reading, and the measure of the
       text matters more than the mascot. So: one centered column, no islands,
       and this page ships zero JavaScript beyond the shared theme/cursor scripts. */}
-  <main class="mx-auto w-full max-w-3xl px-6 py-16 sm:py-24">
-    {/* TODO(you): Step 6's Nav.astro replaces this top link. Until then it's the
-        only way out of a post, so it stays. */}
-    <a
-      href="/blog"
-      data-avatar-react
-      class="font-mono text-sm text-muted transition-colors hover:text-foreground"
-    >
-      ← Writing
-    </a>
-
+  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
     <article>
       {/* The header sits OUTSIDE .prose on purpose. The typography plugin styles
           every descendant element (`.prose :where(p)` etc.) at the same
           specificity as a Tailwind utility, so `text-xs font-mono` on a <p> in
           here would be a coin toss decided by stylesheet order. Keeping the
           header out means our utilities are the only rules in play. */}
-      <header class="mt-8">
+      <header>
         <h1
           class="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl"
         >

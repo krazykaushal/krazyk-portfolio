@@ -27,7 +27,7 @@ const posts = await getPublishedPosts();
       needs it, that's the moment to extract a PageShell.astro. */}
   <main class="mx-auto flex max-w-7xl flex-col md:flex-row-reverse md:items-start">
     <div
-      class="flex flex-col items-center justify-center gap-6 px-6 pt-12 md:sticky md:top-0 md:h-svh md:w-2/5 md:shrink-0 md:flex-row md:gap-4 md:px-0 md:pt-0 lg:w-1/3"
+      class="flex flex-col items-center justify-center gap-6 px-6 pt-20 md:sticky md:top-0 md:h-svh md:w-2/5 md:shrink-0 md:flex-row md:gap-4 md:px-0 md:pt-0 lg:w-1/3"
     >
       <div class="relative w-56 shrink-0 sm:w-72 md:min-w-0 md:flex-1">
         <div
@@ -52,19 +52,9 @@ const posts = await getPublishedPosts();
 
     <div class="md:min-w-0 md:flex-1">
       <section class="px-6 py-24 md:px-16 lg:px-24">
-        {/* TODO(you): Step 6 replaces this with Nav.astro. Until then it's the
-            only way back to the home page, so it stays. */}
-        <a
-          href="/"
-          data-avatar-react
-          class="font-mono text-sm text-muted transition-colors hover:text-foreground"
-        >
-          ← Home
-        </a>
-
         {/* <h1> because this is the page's own title — the home page's sections
             use <h2> since the hero owns the h1 there. One h1 per page. */}
-        <h1 class="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Writing
         </h1>
 
