@@ -1,0 +1,155 @@
+---
+// One blog post. This is the first *dynamic* route in the project: the filename
+// is a pattern, not a path, and one HTML file gets emitted per post at build.
+//
+// Why `[...slug]` (a rest param) and not `[slug]`: the glob loader keeps the
+// folder structure in the entry id, so a post at src/content/blog/2026/notes.mdx
+// has the id `2026/notes`. A single param matches one path segment and would
+// never match that slash; a rest param matches the whole remainder.
+//
+// https://docs.astro.build/en/guides/routing/#dynamic-routes
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { render } from 'astro:content';
+
+import Layout from '@/layouts/Layout.astro';
+import Footer from '@/components/ui/Footer.astro';
+import { formatPostDate, getPublishedPosts, readingTime } from '@/lib/blog';
+
+// getStaticPaths is the contract that says "these URLs exist". Astro calls it at
+// build time, once, and builds exactly the pages it returns — anything else 404s.
+// Each entry is `{ params, props }`: `params` fills the [...slug] segment in the
+// filename, `props` is handed to this same file as Astro.props. Passing the whole
+// post through props means the page body never has to look it up again.
+//
+// Using getPublishedPosts (not getCollection) means drafts get no URL in a
+// production build, while `astro dev` still serves them.
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}) satisfies GetStaticPaths;
+
+// `satisfies GetStaticPaths` above + this line are how a dynamic page gets typed
+// props: InferGetStaticPropsType reads the return type of the function and hands
+// us `{ post: Post }`. Astro looks for a local type named `Props` to type
+// Astro.props, so declaring it is all the wiring needed.
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, tags } = post.data;
+
+// `render` compiles the MDX body and hands back a component. It's async because
+// the compiled module is imported on demand. It also returns `headings` (every
+// heading in the body, with depth/slug/text) — that's the input for a table of
+// contents if we ever want one.
+const { Content } = await render(post);
+
+const minutes = readingTime(post);
+---
+
+{/* ogType="article" instead of the default "website": this is dated, authored
+    content, and that's the signal crawlers and social cards look for. */}
+<Layout title={`${title} — Kaushal Patel`} {description} ogType="article">
+  {/* No avatar lane here, by design. The home page and /blog are showcases, so
+      the mascot earns its space; a post is for reading, and the measure of the
+      text matters more than the mascot. So: one centered column, no islands,
+      and this page ships zero JavaScript beyond the shared theme/cursor scripts. */}
+  <main class="mx-auto w-full max-w-3xl px-6 py-16 sm:py-24">
+    {/* TODO(you): Step 6's Nav.astro replaces this top link. Until then it's the
+        only way out of a post, so it stays. */}
+    <a
+      href="/blog"
+      data-avatar-react
+      class="font-mono text-sm text-muted transition-colors hover:text-foreground"
+    >
+      ← Writing
+    </a>
+
+    <article>
+      {/* The header sits OUTSIDE .prose on purpose. The typography plugin styles
+          every descendant element (`.prose :where(p)` etc.) at the same
+          specificity as a Tailwind utility, so `text-xs font-mono` on a <p> in
+          here would be a coin toss decided by stylesheet order. Keeping the
+          header out means our utilities are the only rules in play. */}
+      <header class="mt-8">
+        <h1
+          class="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl"
+        >
+          {title}
+        </h1>
+
+        <p
+          class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted"
+        >
+          <time datetime={pubDate.toISOString()}>{formatPostDate(pubDate)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{minutes} min read</span>
+          {
+            /* Only rendered when the post actually has one — `updatedDate` is
+               .optional() in the schema, so it's `Date | undefined`. && on a
+               possibly-undefined value would print nothing but is less clear
+               than saying "when it exists". */
+            updatedDate && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>
+                  Updated{' '}
+                  <time datetime={updatedDate.toISOString()}>
+                    {formatPostDate(updatedDate)}
+                  </time>
+                </span>
+              </>
+            )
+          }
+        </p>
+
+        {
+          /* Same pill as PostCard's. Second use, so it's still duplication and
+             not yet a component — if a third caller needs it, extract TagPill. */
+          tags.length > 0 && (
+            <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tags">
+              {tags.map((tag) => (
+                <li>
+                  <a
+                    href={`/blog/tags/${tag}`}
+                    class="inline-flex items-center rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent pointer-coarse:min-h-11 pointer-coarse:px-4"
+                  >
+                    {tag}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+
+      {/* `prose` is the typography plugin's hook — it styles the raw HTML the
+          MDX compiler emits (headings, lists, blockquotes, code) which otherwise
+          renders completely unstyled, because Tailwind's preflight strips
+          browser defaults.
+
+          `max-w-none` because `prose` sets its own max-width: 65ch. Without this
+          the body would be visibly narrower than the h1 above it, which reads as
+          a bug rather than as a deliberate measure — the max-w-3xl container is
+          already doing that job for the whole page. */}
+      <div class="prose mt-12 max-w-none">
+        <Content />
+      </div>
+    </article>
+
+    <div class="mt-16 border-t border-foreground/10 pt-8">
+      <a
+        href="/blog"
+        data-avatar-react
+        class="font-mono text-sm text-muted transition-colors hover:text-foreground"
+      >
+        ← Writing
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

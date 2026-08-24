@@ -17,6 +17,14 @@ interface Props {
   description?: string;
   /** Path (relative to the site origin) of the Open Graph image. */
   ogImage?: string;
+  /**
+   * The Open Graph object type. Pages are "website"; a blog post is "article",
+   * which is what tells a crawler this is dated, authored content rather than a
+   * landing page. The caller passes it because the caller is the only one that
+   * knows — branching on Astro.url.pathname here would work today and rot the
+   * first time a route moves.
+   */
+  ogType?: "website" | "article";
 }
 
 const DEFAULT_TITLE = "Kaushal Patel — Software Engineer";
@@ -26,6 +34,7 @@ const {
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
   ogImage = "/og.png",
+  ogType = "website",
 } = Astro.props;
 
 // Astro.site comes from the `site` option in astro.config.mjs — this is the
@@ -80,7 +89,7 @@ const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=s
     />
 
     {/* Open Graph */}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="Kaushal Patel" />
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
