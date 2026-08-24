@@ -1,0 +1,87 @@
+---
+// Every post carrying one tag. The second dynamic route, and deliberately the
+// mirror image of the post page: same getStaticPaths shape, but `[tag]` is a
+// *single* param, not a rest param.
+//
+// That difference is the whole point. `[...slug]` had to be a rest param because
+// a glob-loader id can contain a slash. A tag can't: the schema lowercases them
+// and the convention (see BLOG.md) is lowercase-and-hyphens, so a tag is always
+// exactly one path segment. Use the narrower pattern when the data allows it —
+// it's the one that says what's true.
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+
+import Layout from '@/layouts/Layout.astro';
+import Footer from '@/components/ui/Footer.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import { allTags, getPublishedPosts, postsByTag } from '@/lib/blog';
+
+// One page per distinct tag. Note that both the URL list and the contents come
+// out of the same `posts` array read once here — getStaticPaths runs at build
+// time, so all the filtering is done before any HTML exists.
+//
+// Worth noticing: because the URLs are *derived* from the posts, a tag page with
+// zero posts is unreachable by construction. There's no empty state to write,
+// unlike /blog — the route simply wouldn't be generated.
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+
+  return allTags(posts).map((tag) => ({
+    params: { tag },
+    props: { tag, posts: postsByTag(posts, tag) },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { tag, posts } = Astro.props;
+
+const heading = `Posts tagged “${tag}”`;
+const count = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
+---
+
+<Layout
+  title={`${heading} — Kaushal Patel`}
+  description={`Everything I've written about ${tag}.`}
+>
+  {/* A centered column rather than the home page's two-lane avatar shell. A tag
+      page is a filtered view you arrive at from a pill — part of the reading
+      flow, closer to a post than to the /blog showcase. Keeping it this shape
+      also avoids copying that shell a third time; see the note at the bottom of
+      this file if you'd rather have the avatar here. */}
+  <main class="mx-auto w-full max-w-4xl px-6 py-16 sm:py-24">
+    {/* TODO(you): Step 6's Nav.astro replaces this. */}
+    <a
+      href="/blog"
+      data-avatar-react
+      class="font-mono text-sm text-muted transition-colors hover:text-foreground"
+    >
+      ← Writing
+    </a>
+
+    <h1
+      class="mt-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+    >
+      {heading}
+    </h1>
+
+    <p class="mt-3 font-mono text-xs text-muted">{count}</p>
+
+    {/* No <Reveal> here, on purpose. A tag page is a short list that's almost
+        entirely above the fold, so a scroll-triggered fade would fire instantly
+        on load — animation with no reason behind it, plus the GSAP bundle. Like
+        the post page, this route ships zero JavaScript of its own. */}
+    <ul class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {posts.map((post) => <PostCard post={post} headingLevel={2} />)}
+    </ul>
+  </main>
+
+  <Footer />
+</Layout>
+
+{
+  /* TODO(you), your call: the two-lane sticky-avatar shell now has two copies
+     (src/pages/index.astro and src/pages/blog/index.astro). If you want it here
+     too, that's the third use — extract it as src/components/ui/PageShell.astro
+     with a <slot /> for the content lane first, then use it in all three, rather
+     than pasting it once more. */
+}
