@@ -1,0 +1,88 @@
+---
+// One blog post, as a card. Used by /blog, the tag pages, and the home-page
+// "Writing" teaser — three callers with three different grids, which is why
+// this renders a single <li> and nothing around it. The parent owns the <ul>
+// and its grid classes; the card never assumes its own layout.
+//
+// Fully static: no state, no browser events of its own, so it's a plain .astro
+// component and ships zero JavaScript.
+import { formatPostDate, readingTime, type Post } from '@/lib/blog';
+
+interface Props {
+  post: Post;
+  // Lets the parent add layout classes (spacing, span) without this component
+  // having to know about its surroundings — same convention as SocialLinks.
+  class?: string;
+}
+
+const { post, class: className = '' } = Astro.props;
+
+// Destructuring the validated frontmatter keeps the markup below readable.
+// These are typed from the Zod schema in src/content.config.ts, so `tags` is
+// always a string[] (never undefined) and `pubDate` is always a real Date.
+const { title, description, pubDate, tags } = post.data;
+
+// `id` is the slug the glob loader derived from the filename.
+const href = `/blog/${post.id}`;
+const minutes = readingTime(post);
+---
+
+{/* data-avatar-react is the site's single definition of "interactive" — both
+    the sticky avatar and the custom cursor query it, so adding the attribute
+    is all the wiring the reactions need. */}
+<li
+  data-avatar-react
+  class:list={[
+    'flex flex-col rounded-xl border border-foreground/10 bg-surface p-6 transition-colors hover:border-accent/40',
+    className,
+  ]}
+>
+  <h3 class="text-lg font-semibold">
+    {/* The card is NOT wrapped in an <a>, because the tag pills below are
+        links too and a link inside a link is invalid HTML. So the title is the
+        link instead.
+
+        `-m-2 p-2` is the touch-target trick: the padding grows the hit area to
+        ~44px tall, and the equal negative margin pulls the box back so nothing
+        moves visually. `inline-block` is needed for the padding to apply. */}
+    <a
+      href={href}
+      class="-m-2 inline-block rounded-md p-2 text-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    >
+      {title}
+    </a>
+  </h3>
+
+  {/* <time datetime> ships the machine-readable date alongside the human one.
+      `pubDate` is a Date, so toISOString() is the correct valid value. */}
+  <p class="mt-2 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
+    <time datetime={pubDate.toISOString()}>{formatPostDate(pubDate)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{minutes} min read</span>
+  </p>
+
+  <p class="mt-3 text-sm leading-relaxed text-muted">{description}</p>
+
+  {/* mt-auto pins the tags to the card bottom so cards in a row line up even
+      when descriptions differ in length; pt-6 keeps the gap when they wrap. */}
+  {
+    tags.length > 0 && (
+      <ul class="mt-auto flex flex-wrap gap-2 pt-6" aria-label="Tags">
+        {tags.map((tag) => (
+          <li>
+            {/* Same pill as Work.astro's tech tags, but interactive. Touch
+                targets: a 24px pill is fine for a mouse and too small for a
+                thumb, so `pointer-coarse:` (Tailwind v4) grows it to 44px on
+                touch devices only, leaving desktop density alone. */}
+            <a
+              href={`/blog/tags/${tag}`}
+              class="inline-flex items-center rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent transition-colors hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent pointer-coarse:min-h-11 pointer-coarse:px-4"
+            >
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</li>

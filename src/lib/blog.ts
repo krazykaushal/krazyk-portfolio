@@ -45,6 +45,13 @@ export function formatPostDate(date: Date): string {
 /**
  * Every post that should be visible, newest first.
  *
+ * Drafts are dropped in production only: `import.meta.env.PROD` is a
+ * compile-time constant, so in a build the predicate collapses to
+ * `!entry.data.draft`, while `astro dev` keeps showing work in progress.
+ *
+ * `toSorted` rather than `sort` so the array `getCollection` handed us is never
+ * mutated — it returns the sorted copy, which is what we return.
+ *
  * https://docs.astro.build/en/reference/modules/astro-content/#getcollection
  */
 export async function getPublishedPosts(): Promise<Post[]> {
