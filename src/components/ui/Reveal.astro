@@ -1,0 +1,36 @@
+---
+// Wraps any content and fades/slides it up the first time it scrolls into view.
+//
+// The Next version was a 'use client' React wrapper so it could animate
+// server-rendered children. Astro's <slot /> does that natively and for free:
+// the children render as plain HTML, and only this component's <script> ships.
+//
+// One <script> handles *every* Reveal on the page, not one per instance —
+// Astro hoists and bundles a component's script once per page, so it runs once
+// however many times the component is used. Hence the [data-reveal] query.
+---
+
+<div data-reveal><slot /></div>
+
+<script>
+  import { gsap } from '@/lib/gsap';
+
+  // Reduced motion: leave content in its natural, visible state.
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    for (const el of document.querySelectorAll<HTMLElement>('[data-reveal]')) {
+      // gsap.from animates FROM these values TO the element's natural state
+      // (opacity 1, y 0). The scrollTrigger ties that playback to scroll.
+      gsap.from(el, {
+        opacity: 0,
+        y: 40,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%', // when el's top hits 80% down the viewport
+          once: true, // reveal once, then stop watching
+        },
+      });
+    }
+  }
+</script>

@@ -1,0 +1,21 @@
+---
+// Contact.astro is a zero-JS .astro component; only the interactive form is a
+// React island. In Next this split was 'use client' on ContactForm.tsx; in Astro
+// it's the client:visible directive on the <ContactForm /> usage below — the
+// choice of *when* to hydrate now lives at the call site, not in the component.
+import ContactForm from './ContactForm.tsx';
+---
+
+<section id="contact" class="px-6 py-24 md:px-16 lg:px-24">
+  <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Contact</h2>
+
+  <p class="mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+    Have a project in mind, or just want to say hi? Drop me a message and I&apos;ll get back to you.
+  </p>
+
+  {/* client:visible — the form's markup is server-rendered into the page (so
+      it's crawlable and there's no layout shift), and React only hydrates it
+      when it scrolls into view. Contact is near the bottom of a long page, so
+      most visitors never pay for that JS at all. */}
+  <ContactForm client:visible />
+</section>

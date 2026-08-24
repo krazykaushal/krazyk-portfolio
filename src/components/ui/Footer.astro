@@ -1,0 +1,40 @@
+---
+// Site footer: copyright + license. Static content with no browser events, so
+// it stays a plain .astro component — in Astro that means it ships literally
+// zero JavaScript (the same reasoning as the Next server component, just with a
+// stronger guarantee). Rendered *outside* <main> in src/pages/index.astro so it
+// spans the full width and isn't swept into the main content landmark.
+//
+// No data-avatar-react on the license link (unlike SocialLinks): the avatar
+// lives in a sticky lane *inside* <main>, which has scrolled out of view by the
+// time you reach the footer — a hover reaction here would never be seen.
+
+// Evaluated at build time (the site is statically generated), so this is baked
+// into the HTML and refreshes on every deploy. Computing it in a client island
+// instead would risk a mismatch at the turn of the year and ship needless JS.
+const year = new Date().getFullYear();
+---
+
+{/* Its own max-w-7xl + mx-auto so it lines up with <main> even though it sits
+    outside it. Tokens (text-muted, foreground/10) keep it theme-aware. */}
+<footer
+  class="mx-auto max-w-7xl border-t border-foreground/10 px-6 py-8 text-center text-sm text-muted"
+>
+  <p>© {year} Kaushal Patel</p>
+  {/* Astro strips whitespace that is only a newline + indentation between text
+      and an adjacent tag, so the spaces around the link have to be explicit.
+      `{' '}` (the same idiom JSX needs) is the tidiest way to say "a space
+      belongs here" without collapsing the markup onto one long line. */}
+  <p class="mt-1">
+    Code licensed under{' '}
+    <a
+      href="https://github.com/krazykaushal/krazyk-portfolio/blob/main/LICENSE"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="underline underline-offset-2 transition-colors hover:text-foreground"
+    >
+      MIT
+    </a>{' '}
+    &middot; Content &amp; artwork all rights reserved
+  </p>
+</footer>

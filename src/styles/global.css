@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: the .dark class on <html> activates dark: variants */
+@variant dark (&:where(.dark, .dark *));
+
+/* Light mode tokens */
+:root {
+  --background: #f8f8f8;
+  --surface: #ffffff;
+  --foreground: #111111;
+  --muted: #666666;
+  --accent: #60a5fa; /* blue-400 — change this to your brand color */
+}
+
+/* Dark mode tokens (active by default since <html> has class="dark") */
+.dark {
+  --background: #0f0f11;
+  --surface: #1a1a1f;
+  --foreground: #f0f0f0;
+  --muted: #888888;
+  --accent: #60a5fa;
+}
+
+/* Expose tokens to Tailwind as bg-background, text-foreground, etc. */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  /* Both variables are defined on :root by Astro's <Font> component in
+     Layout.astro (the next/font replacement). `@theme inline` keeps them as
+     var() references rather than copying the value, so order doesn't matter. */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Smooth-scroll anchor jumps (the hero's "See my work" / "Get in touch" CTAs →
+   #work / #contact, and any future in-page link). Native + dependency-free.
+   The reduced-motion block below resets this to `auto`, so motion-sensitive
+   visitors get an instant jump instead. */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Custom cursor: Cursor.astro adds .cursor-none to <html> only when the JS
+   follower is active (pointer: fine + motion allowed), so we hide the OS cursor
+   everywhere. !important overrides per-element cursors (buttons, the avatar's
+   cursor: pointer). Touch / reduced-motion users never get the class, so they
+   keep their native cursor. */
+.cursor-none,
+.cursor-none * {
+  cursor: none !important;
+}
+
+/* Reduced-motion safety net. The avatar's GSAP animations are already gated in
+   JS via matchMedia; this covers CSS transitions/animations + smooth scroll for
+   anyone who asks the OS to minimize motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

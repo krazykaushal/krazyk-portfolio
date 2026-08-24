@@ -1,0 +1,105 @@
+---
+// The app/layout.tsx replacement.
+//
+// Next gave us three things here for free that Astro asks us to be explicit
+// about, so this file is where each one lands:
+//   1. `export const metadata` → hand-written <meta> tags below.
+//   2. `next/font/google`      → <Font> from astro:assets (see astro.config.mjs).
+//   3. The <html>/<body> shell → written out literally, as in plain HTML.
+import { Font } from "astro:assets";
+
+import "@/styles/global.css";
+import ThemeToggle from "@/components/ui/ThemeToggle.astro";
+import Cursor from "@/components/ui/Cursor.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Path (relative to the site origin) of the Open Graph image. */
+  ogImage?: string;
+}
+
+const DEFAULT_TITLE = "Kaushal Patel — Software Engineer";
+const DEFAULT_DESCRIPTION = "Software Engineer | AI/ML & Full Stack";
+
+const {
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+  ogImage = "/og.png",
+} = Astro.props;
+
+// Astro.site comes from the `site` option in astro.config.mjs — this is the
+// `metadataBase` equivalent, and it's what makes the OG/canonical URLs
+// absolute (crawlers require that).
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImageUrl = new URL(ogImage, Astro.site);
+
+// Runs before first paint (a blocking inline <script>, mounted below): set the
+// .dark class from the saved choice, falling back to the OS preference. Inline
+// scripts block parsing, so the class is correct before anything paints — no
+// flash of the wrong theme (FOUC). To always default new visitors to dark
+// regardless of their OS, swap the matchMedia(...) call for `true`.
+//
+// `is:inline` is the important bit: without it Astro would hoist this into a
+// bundled, deferred module script, which runs *after* first paint — exactly the
+// flash we're avoiding.
+const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+---
+
+<!doctype html>
+<html lang="en" class="dark h-full antialiased">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {
+      /* Pre-paint theme script. First thing in <head> so the .dark class is
+        settled before any stylesheet or content is painted. Note that .astro
+        HTML comments ship to the browser, while these JS-style ones don't. */
+    }
+    <script is:inline set:html={themeScript} />
+
+    {
+      /* Self-hosted Geist + Geist Mono, from the `fonts` config in
+        astro.config.mjs. `preload` emits preload links for the font files so
+        text doesn't wait on the CSS round-trip. */
+    }
+    <Font cssVariable="--font-geist-sans" preload />
+    <Font cssVariable="--font-geist-mono" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta name="author" content="Kaushal Patel" />
+    <meta
+      name="keywords"
+      content="Kaushal Patel, Software Engineer, Full Stack Developer, AI/ML, Astro, React, Python"
+    />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kaushal Patel" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={DEFAULT_TITLE} />
+
+    {/* Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+  </head>
+
+  <body class="min-h-full bg-background text-foreground">
+    <ThemeToggle />
+    <Cursor />
+    <slot />
+  </body>
+</html>
