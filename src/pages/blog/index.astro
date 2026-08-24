@@ -1,0 +1,100 @@
+---
+// The post index. `src/pages/blog/index.astro` maps to `/blog` — a folder with
+// an index file, exactly like `src/pages/index.astro` maps to `/`.
+//
+// Everything here runs at build time: the frontmatter reads the collection, the
+// markup renders to static HTML. The only JavaScript this page ships is the
+// avatar island and the Reveal script.
+import Layout from '@/layouts/Layout.astro';
+import Avatar from '@/components/Avatar/Avatar.tsx';
+import SocialLinks from '@/components/ui/SocialLinks.astro';
+import Reveal from '@/components/ui/Reveal.astro';
+import Footer from '@/components/ui/Footer.astro';
+import PostCard from '@/components/blog/PostCard.astro';
+import { getPublishedPosts } from '@/lib/blog';
+
+const posts = await getPublishedPosts();
+---
+
+<Layout
+  title="Writing — Kaushal Patel"
+  description="Notes on building for the web — Astro, React, animation, and whatever I'm learning."
+>
+  {/* Same two-lane shell as the home page: content on the left, sticky avatar
+      lane on the right (flex-row-reverse), stacking to a single column on
+      mobile. This markup is duplicated from src/pages/index.astro on purpose —
+      two uses isn't yet evidence of the right abstraction. If a third page
+      needs it, that's the moment to extract a PageShell.astro. */}
+  <main class="mx-auto flex max-w-7xl flex-col md:flex-row-reverse md:items-start">
+    <div
+      class="flex flex-col items-center justify-center gap-6 px-6 pt-12 md:sticky md:top-0 md:h-svh md:w-2/5 md:shrink-0 md:flex-row md:gap-4 md:px-0 md:pt-0 lg:w-1/3"
+    >
+      <div class="relative w-56 shrink-0 sm:w-72 md:min-w-0 md:flex-1">
+        <div
+          aria-hidden="true"
+          class="absolute left-1/2 top-[-10%] -z-20 aspect-square w-[88%] -translate-x-1/2 rounded-full bg-accent/20 blur-2xl"
+        >
+        </div>
+        <div
+          aria-hidden="true"
+          class="absolute left-1/2 top-[-6%] -z-10 hidden aspect-square w-[78%] -translate-x-1/2 rounded-full bg-linear-to-b from-zinc-100 to-zinc-300 dark:block"
+        >
+        </div>
+        {/* client:load matches the home page so the avatar behaves identically
+            on both. If the blog's Lighthouse score ever needs the headroom,
+            client:idle is the cheaper option here — this page has no on-load
+            hero timeline waiting on it. */}
+        <Avatar client:load className="h-auto w-full" />
+      </div>
+
+      <SocialLinks class="shrink-0" />
+    </div>
+
+    <div class="md:min-w-0 md:flex-1">
+      <section class="px-6 py-24 md:px-16 lg:px-24">
+        {/* TODO(you): Step 6 replaces this with Nav.astro. Until then it's the
+            only way back to the home page, so it stays. */}
+        <a
+          href="/"
+          data-avatar-react
+          class="font-mono text-sm text-muted transition-colors hover:text-foreground"
+        >
+          ← Home
+        </a>
+
+        {/* <h1> because this is the page's own title — the home page's sections
+            use <h2> since the hero owns the h1 there. One h1 per page. */}
+        <h1 class="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Writing
+        </h1>
+
+        <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+          Notes on things I'm building and learning — mostly the web platform,
+          animation, and whatever I've just gotten wrong.
+        </p>
+
+        {
+          posts.length === 0 ? (
+            /* An empty grid renders as a bare heading with nothing under it,
+               which reads as broken rather than as "no posts yet". */
+            <p class="mt-8 font-mono text-sm text-muted">
+              Nothing published yet. Soon.
+            </p>
+          ) : (
+            <Reveal>
+              {/* The grid lives here, not in PostCard — the card renders one
+                  <li> and lets each caller choose its own columns. */}
+              <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+                {posts.map((post) => (
+                  <PostCard post={post} headingLevel={2} />
+                ))}
+              </ul>
+            </Reveal>
+          )
+        }
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

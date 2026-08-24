@@ -10,12 +10,26 @@ import { formatPostDate, readingTime, type Post } from '@/lib/blog';
 
 interface Props {
   post: Post;
+  /**
+   * Which heading level the card title should be. Headings shouldn't skip
+   * levels, and this card appears under two different ancestors: on /blog it
+   * sits under the page's <h1>, so it's an <h2>; in the home page's "Writing"
+   * section it sits under that section's <h2>, so it's an <h3>. The caller is
+   * the only one that knows, so the caller decides.
+   */
+  headingLevel?: 2 | 3;
   // Lets the parent add layout classes (spacing, span) without this component
   // having to know about its surroundings — same convention as SocialLinks.
   class?: string;
 }
 
-const { post, class: className = '' } = Astro.props;
+const { post, headingLevel = 2, class: className = '' } = Astro.props;
+
+// Astro renders a capitalized variable holding a tag name as that element, so
+// this is how you get a dynamic heading tag. The ternary (rather than a
+// template string) keeps the type a literal union instead of `string`, which is
+// what lets TypeScript check it as a real HTML tag.
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
 
 // Destructuring the validated frontmatter keeps the markup below readable.
 // These are typed from the Zod schema in src/content.config.ts, so `tags` is
@@ -37,7 +51,7 @@ const minutes = readingTime(post);
     className,
   ]}
 >
-  <h3 class="text-lg font-semibold">
+  <Heading class="text-lg font-semibold">
     {/* The card is NOT wrapped in an <a>, because the tag pills below are
         links too and a link inside a link is invalid HTML. So the title is the
         link instead.
@@ -51,7 +65,7 @@ const minutes = readingTime(post);
     >
       {title}
     </a>
-  </h3>
+  </Heading>
 
   {/* <time datetime> ships the machine-readable date alongside the human one.
       `pubDate` is a Date, so toISOString() is the correct valid value. */}
