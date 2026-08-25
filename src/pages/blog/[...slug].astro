@@ -58,7 +58,20 @@ const minutes = readingTime(post);
       the mascot earns its space; a post is for reading, and the measure of the
       text matters more than the mascot. So: one centered column, no islands,
       and this page ships zero JavaScript beyond the shared theme/cursor scripts. */}
-  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    {/* One measure for the whole column. `max-w-3xl` was 48rem, which grew to
+      864px when the root font size went to 1.125rem — so the header (full
+      container width) overhung the body (`.prose`'s own 65ch, ~650px) and the
+      text read as off-centre inside a wider box.
+
+      `calc(65ch + 3rem)` makes the container's CONTENT box exactly 65ch: 65ch of
+      text plus the 1.5rem of px-6 padding on each side. Now the h1, the meta
+      line, the body and the footer nav all share one width, and `.prose`'s own
+      max-width lands on exactly the same number instead of fighting it.
+
+      `ch` keeps it font-size independent — that was the whole reason for
+      dropping `max-w-none`, and a rem container would have re-introduced the
+      drift. */}
+  <main class="mx-auto w-full max-w-[calc(65ch_+_3rem)] px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
     <article>
       {/* The header sits OUTSIDE .prose on purpose. The typography plugin styles
           every descendant element (`.prose :where(p)` etc.) at the same

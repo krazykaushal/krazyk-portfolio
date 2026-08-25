@@ -42,7 +42,10 @@ const { Content } = await render(snippet);
   ogType="article"
 >
   {/* No avatar lane: this is reference material you came here to read. */}
-  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    {/* Content box is exactly 65ch — the same measure `.prose` uses, so the
+      header and the body share one width. See blog/[...slug].astro for the
+      full reasoning behind the calc. */}
+  <main class="mx-auto w-full max-w-[calc(65ch_+_3rem)] px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
     <a
       href={`/snippets/languages/${language}`}
       data-avatar-react
