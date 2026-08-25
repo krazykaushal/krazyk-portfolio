@@ -13,7 +13,8 @@ import { render } from 'astro:content';
 
 import Layout from '@/layouts/Layout.astro';
 import Footer from '@/components/ui/Footer.astro';
-import { formatPostDate, getPublishedPosts, readingTime } from '@/lib/blog';
+import { getPublishedPosts, readingTime } from '@/lib/blog';
+import { formatDate } from '@/lib/content';
 
 // getStaticPaths is the contract that says "these URLs exist". Astro calls it at
 // build time, once, and builds exactly the pages it returns — anything else 404s.
@@ -74,7 +75,7 @@ const minutes = readingTime(post);
         <p
           class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted"
         >
-          <time datetime={pubDate.toISOString()}>{formatPostDate(pubDate)}</time>
+          <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
           <span aria-hidden="true">·</span>
           <span>{minutes} min read</span>
           {
@@ -88,7 +89,7 @@ const minutes = readingTime(post);
                 <span>
                   Updated{' '}
                   <time datetime={updatedDate.toISOString()}>
-                    {formatPostDate(updatedDate)}
+                    {formatDate(updatedDate)}
                   </time>
                 </span>
               </>

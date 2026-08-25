@@ -6,7 +6,8 @@
 //
 // Fully static: no state, no browser events of its own, so it's a plain .astro
 // component and ships zero JavaScript.
-import { formatPostDate, readingTime, type Post } from '@/lib/blog';
+import { readingTime, type Post } from '@/lib/blog';
+import { formatDate } from '@/lib/content';
 
 interface Props {
   post: Post;
@@ -70,7 +71,7 @@ const minutes = readingTime(post);
   {/* <time datetime> ships the machine-readable date alongside the human one.
       `pubDate` is a Date, so toISOString() is the correct valid value. */}
   <p class="mt-2 flex flex-wrap items-center gap-x-2 font-mono text-xs text-muted">
-    <time datetime={pubDate.toISOString()}>{formatPostDate(pubDate)}</time>
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
     <span aria-hidden="true">·</span>
     <span>{minutes} min read</span>
   </p>

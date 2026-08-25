@@ -21,28 +21,6 @@ export type Post = CollectionEntry<"blog">;
 const WORDS_PER_MINUTE = 200;
 
 /**
- * Format a post date for display: `new Date('2026-08-24')` → "Aug 24, 2026".
- *
- * `Intl.DateTimeFormat` is the built-in the whole date-formatting-library
- * industry exists to wrap — it needs no dependency and knows every locale.
- * We pin the locale to 'en-US' rather than passing `undefined` (which would
- * use the runtime's locale) because this runs at BUILD time: whatever the
- * build machine's locale happens to be would get baked into the HTML.
- *
- * `timeZone: 'UTC'` matters for the same reason. A frontmatter date like
- * `2026-08-24` parses as midnight UTC, so formatting it in a timezone behind
- * UTC would render the 23rd.
- */
-export function formatPostDate(date: Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
-}
-
-/**
  * Every post that should be visible, newest first.
  *
  * Drafts are dropped in production only: `import.meta.env.PROD` is a
