@@ -1,0 +1,138 @@
+---
+// One snippet. Structurally blog/[...slug].astro with different metadata.
+//
+// Rest param rather than [slug] for the same reason the blog uses one: glob
+// loader ids keep folder structure, so this survives you deciding to nest
+// snippets in directories later. It costs nothing now.
+//
+// This route and /snippets/languages/[language].astro deliberately don't
+// overlap — see the comment in that file for why the browse axis is nested.
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { render } from 'astro:content';
+
+import Layout from '@/layouts/Layout.astro';
+import Footer from '@/components/ui/Footer.astro';
+import { formatDate } from '@/lib/content';
+import { getPublishedSnippets } from '@/lib/snippets';
+
+export const getStaticPaths = (async () => {
+  const snippets = await getPublishedSnippets();
+
+  return snippets.map((snippet) => ({
+    params: { slug: snippet.id },
+    props: { snippet },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { snippet } = Astro.props;
+const { title, description, language, tags, addedDate, updatedDate, source } =
+  snippet.data;
+
+// `render` compiles the MDX body and returns a component. Async because the
+// compiled module is imported on demand.
+const { Content } = await render(snippet);
+---
+
+{/* ogType="article" — dated, authored content rather than a landing page. */}
+<Layout
+  title={`${title} — Kaushal Patel`}
+  description={description ?? `A ${language} snippet.`}
+  ogType="article"
+>
+  {/* No avatar lane: this is reference material you came here to read. */}
+  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    <a
+      href={`/snippets/languages/${language}`}
+      data-avatar-react
+      class="font-mono text-sm text-muted transition-colors hover:text-foreground"
+    >
+      ← {language}
+    </a>
+
+    <article>
+      {/* The header sits OUTSIDE .prose on purpose. The typography plugin styles
+          every descendant (`.prose :where(p)` etc.) at the same specificity as a
+          Tailwind utility, so `font-mono text-xs` on a <p> in here would be a
+          coin toss decided by stylesheet order. */}
+      <header class="mt-8">
+        <h1
+          class="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl"
+        >
+          {title}
+        </h1>
+
+        <p class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs">
+          <span class="rounded bg-accent/10 px-1.5 py-0.5 font-medium text-accent">
+            {language}
+          </span>
+          <span class="text-muted" aria-hidden="true">·</span>
+          <time class="text-muted" datetime={addedDate.toISOString()}>
+            {formatDate(addedDate)}
+          </time>
+          {
+            /* Only when it exists — `updatedDate` is .optional() in the schema,
+               so it's `Date | undefined`. */
+            updatedDate && (
+              <>
+                <span class="text-muted" aria-hidden="true">·</span>
+                <span class="text-muted">
+                  Updated{' '}
+                  <time datetime={updatedDate.toISOString()}>
+                    {formatDate(updatedDate)}
+                  </time>
+                </span>
+              </>
+            )
+          }
+        </p>
+
+        {description && (
+          <p class="mt-4 text-base leading-relaxed text-muted">{description}</p>
+        )}
+
+        {/* Plain labels, not links — see SnippetCard for why. */}
+        {
+          tags.length > 0 && (
+            <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tags">
+              {tags.map((tag) => (
+                <li class="rounded-full bg-foreground/5 px-2.5 py-1 text-xs font-medium text-muted">
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+
+      {/* `max-w-none` because `prose` sets its own 65ch, which would render the
+          body narrower than the h1 above it — that reads as a bug, not as a
+          deliberate measure. The max-w-3xl container owns the measure. */}
+      <div class="prose mt-10 max-w-none">
+        <Content />
+      </div>
+    </article>
+
+    {
+      /* `source` is validated as a URL by the schema, so this is never a dead
+         anchor — a typo would have failed the build. */
+      source && (
+        <p class="mt-12 border-t border-foreground/10 pt-8 font-mono text-sm text-muted">
+          Source:{' '}
+          <a
+            href={source}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-avatar-react
+            class="text-accent underline underline-offset-2 transition-opacity hover:opacity-80"
+          >
+            {new URL(source).hostname}
+          </a>
+        </p>
+      )
+    }
+  </main>
+
+  <Footer />
+</Layout>
