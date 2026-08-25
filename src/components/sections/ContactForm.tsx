@@ -23,6 +23,21 @@ export default function ContactForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // stop the browser's default full-page form reload
+
+    // The honeypot below is a DOM-only input — it's deliberately not in React
+    // state, so nothing but a bot's autofill ever sets it. That means its value
+    // has to be read off the form element itself; a `name` attribute only
+    // travels on its own during a native submit, and preventDefault() means
+    // there isn't one.
+    //
+    // Two things this line depends on:
+    //   - An unchecked checkbox is ABSENT from FormData, not `false`. Checked,
+    //     with no value attribute, it's the string "on". So presence is the test.
+    //   - It must run before the first `await`: React reassigns e.currentTarget
+    //     once the event finishes dispatching, so reading it after the fetch
+    //     would be null at runtime while still typechecking.
+    const botcheck = new FormData(e.currentTarget).get("botcheck") !== null;
+
     setStatus("submitting");
 
     try {
@@ -37,6 +52,7 @@ export default function ContactForm() {
           // them at build time — the NEXT_PUBLIC_ equivalent.
           access_key: import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY,
           ...form,
+          botcheck,
         }),
       });
       const data = await res.json();
