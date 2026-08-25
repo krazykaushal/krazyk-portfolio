@@ -1,47 +1,148 @@
 ---
-// The home-page teaser for the blog: the three newest posts, then out to /blog.
+// The hub. This section used to tease the three newest blog posts; now that
+// there are three *kinds* of writing, it introduces all three and sends you off
+// to whichever one you want.
 //
-// Same shape as Work.astro — a section, an h2, a grid of cards — so the blog
-// doesn't read as bolted on. Fully static: no state, no browser events, so this
-// ships zero JavaScript. The avatar's reactions still work, because they come
-// from `data-avatar-react` on the cards, which is markup, not script.
-import PostCard from '@/components/blog/PostCard.astro';
+// Nav.astro's `writing` link points at /#writing, so this section is the way in
+// to /blog, /snippets and /monthlog. That's the whole reason it exists — without
+// it those two new routes are unreachable from the home page.
+//
+// Everything here is a build-time query, so what ships is plain HTML. No fetch,
+// no loading state, zero JavaScript.
 import { getPublishedPosts } from '@/lib/blog';
+import { getPublishedSnippets } from '@/lib/snippets';
+import { getPublishedMonths } from '@/lib/monthlog';
+import { formatMonth } from '@/lib/content';
 
-// Reading the collection in frontmatter means this query runs at build time and
-// what ships is plain HTML — there's no fetch, no loading state, no client.
-const LATEST_COUNT = 3;
-const posts = (await getPublishedPosts()).slice(0, LATEST_COUNT);
+const [posts, snippets, months] = await Promise.all([
+  getPublishedPosts(),
+  getPublishedSnippets(),
+  getPublishedMonths(),
+]);
+
+/** One entry point. `latest` is null when the collection is empty. */
+type Category = {
+  name: string;
+  href: string;
+  blurb: string;
+  count: number;
+  /** Singular/plural noun for the count — "post"/"posts". */
+  noun: [singular: string, plural: string];
+  latest: string | null;
+};
+
+// All three lists are sorted newest-first by their lib helpers, so `[0]` is the
+// newest. It's `?? null` rather than `[0]!` because an empty collection is a real
+// state this component handles — and `noUncheckedIndexedAccess` is off here, so
+// TypeScript would let `[0]` through as non-undefined and the truthiness check
+// below would be the only thing saving us.
+const categories: Category[] = [
+  {
+    name: 'Blog',
+    href: '/blog',
+    blurb: 'Longer pieces, written to be read by someone else.',
+    count: posts.length,
+    noun: ['post', 'posts'],
+    latest: posts[0]?.data.title ?? null,
+  },
+  {
+    name: 'Snippets',
+    href: '/snippets',
+    blurb: 'Code I keep coming back to, filed by language.',
+    count: snippets.length,
+    noun: ['snippet', 'snippets'],
+    latest: snippets[0]?.data.title ?? null,
+  },
+  {
+    name: 'Monthlog',
+    href: '/monthlog',
+    blurb: "What I'm building and thinking about, one entry a month.",
+    count: months.length,
+    noun: ['entry', 'entries'],
+    latest: months[0] ? formatMonth(months[0].data.month) : null,
+  },
+];
+
+// If every collection is empty there's nothing to introduce, so the section
+// removes itself rather than rendering three empty cards.
+const hasAnything = categories.some((category) => category.count > 0);
 ---
 
 {
-  /* Render nothing at all when there are no posts. An <h2>Writing</h2> above an
-     empty grid reads as a broken section; a missing section reads as a site that
-     simply doesn't have that yet. Contrast with /blog, which DOES need an empty
-     state — you navigated there deliberately, so silence would look like a 404. */
-  posts.length > 0 && (
+  hasAnything && (
     <section id="writing" class="px-6 py-24 md:px-16 lg:px-24">
-      {/* baseline-aligned so the small link sits on the h2's baseline rather
-          than centered against a much taller box */}
-      <div class="flex flex-wrap items-baseline justify-between gap-4">
-        {/* h2, not h1 — Hero owns the page's only h1. That's also why the cards
-            below get headingLevel={3}: h1 → h2 → h3, no level skipped. */}
-        <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Writing
-        </h2>
+      {/* h2, not h1 — Hero owns the page's only h1. That's why the cards below
+          are h3s: h1 → h2 → h3, no level skipped. */}
+      <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Writing
+      </h2>
 
-        <a
-          href="/blog"
-          data-avatar-react
-          class="font-mono text-sm text-accent transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          Read all →
-        </a>
-      </div>
+      <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+        Three different things, kept separate on purpose.
+      </p>
 
-      <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-        {posts.map((post) => (
-          <PostCard post={post} headingLevel={3} />
+      {/* Three across from md up. The grid lives here; each card is one <li>. */}
+      <ul class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+        {categories.map((category) => (
+          <li class="group" data-avatar-react>
+            {/* The whole card is the link — there's nothing else interactive
+                inside, so unlike PostCard there's no nested-anchor problem, the
+                entire tile is clickable, and the 44px touch target is free.
+
+                `group` here + `group-hover:` below means hovering anywhere on
+                the card drives the accent rail, the heading colour and the
+                arrow together. */}
+            <a
+              href={category.href}
+              class="relative flex h-full flex-col overflow-hidden rounded-xl border border-foreground/10 bg-surface p-6 transition-colors hover:border-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              {/* Accent rail, scaled in from the top. scaleY is a transform, so
+                  it composites — cheaper than animating height. Decorative. */}
+              <span
+                aria-hidden="true"
+                class="absolute inset-y-0 left-0 w-0.5 origin-top scale-y-0 bg-accent transition-transform duration-300 group-hover:scale-y-100"
+              />
+
+              <h3 class="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-accent">
+                {category.name}
+              </h3>
+
+              {/* The live count. Comes from the same query that feeds the pages
+                  themselves, so it can't drift out of date. */}
+              <p class="mt-1 font-mono text-xs tabular-nums text-muted">
+                {category.count}{' '}
+                {category.count === 1 ? category.noun[0] : category.noun[1]}
+              </p>
+
+              <p class="mt-3 text-sm leading-relaxed text-muted">
+                {category.blurb}
+              </p>
+
+              {/* An empty collection says so rather than rendering a blank
+                  teaser line — a card with a gap where the latest item should be
+                  reads as broken. */}
+              <p class="mt-auto pt-6 font-mono text-xs text-muted">
+                {category.latest ? (
+                  <>
+                    <span class="text-muted/70">Latest: </span>
+                    <span class="text-foreground">{category.latest}</span>
+                  </>
+                ) : (
+                  <span class="text-muted/70">Nothing here yet</span>
+                )}
+              </p>
+
+              <p class="mt-4 font-mono text-xs text-accent">
+                Browse
+                <span
+                  aria-hidden="true"
+                  class="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                >
+                  →
+                </span>
+              </p>
+            </a>
+          </li>
         ))}
       </ul>
     </section>
