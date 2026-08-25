@@ -57,7 +57,8 @@ Locked, so they don't get re-litigated mid-build:
 /snippets                           index + language filter row
 /snippets/<slug>                    one snippet
 /snippets/languages/<language>      browse by language
-/monthlog                           ALL months, one page, anchored per month
+/monthlog                           the calendar — a card per month, grouped by year
+/monthlog/<YYYY-MM>                 one month's entry
 /rss.xml                            gains monthlog items
 ```
 
@@ -308,27 +309,72 @@ December).
 
 ---
 
-## Step 9 — `src/pages/monthlog/index.astro`
+## Step 9 — the calendar and the month pages
 
-Every month, one page, reverse chronological.
+**Revised after the first build.** The original spec here was one page rendering
+every month inline with `#2026-08` anchors. It shipped, then got replaced with a
+calendar index plus a page per month. The old version is in git history if you
+want to compare; what follows is what's actually built.
 
-- `const entries = await getPublishedMonths()`.
-- Render N bodies: `const rendered = await Promise.all(entries.map((e) => render(e)))`
-  in frontmatter, then map over the pairs. `render()` is per-entry — there's no
-  batch version, and calling it in a loop is fine.
-- Each month is a `<section>` with `<h2 id={entry.data.month}>` so
-  `/monthlog#2026-08` is a shareable link.
-- `<div class="prose max-w-none">` per body.
-- Centered `max-w-3xl` — it's reading material.
+### `src/pages/monthlog/index.astro` — the calendar
 
-**The one new CSS problem in this sheet:** anchoring mid-page means the target
-heading lands **under the fixed nav**. The existing `/#work` links get away with
-it because those sections have `py-24`, putting the heading 96px below the
-section top. A month heading has no such padding. Add `scroll-mt-24` to the
-`h2`.
+- `groupByYear(await getPublishedMonths())` → `{ year, entries }[]`, newest year
+  first. The grouping relies on the input already being sorted: a `Map` preserves
+  insertion order, so walking a descending list produces descending years with no
+  second sort — and no way for the year order and the within-year order to
+  disagree.
+- Only months that **exist** get a card. No dimmed placeholder cells for months
+  you didn't write, so the grid looks right from the first entry instead of after
+  a year of them.
+- Each year is a `<section>` with the year as a real `<h2>` (it's a section of the
+  archive, and it's what someone navigating by headings would use), a hairline
+  rule under it, then a `<ul>` grid at `sm:grid-cols-2 lg:grid-cols-3`.
+- This page renders **no MDX at all** — it's navigation. The content lives on the
+  month pages.
 
-**Done when:** `/monthlog#2026-08` lands with the heading fully visible below the
-nav at both 375px and 1440px, and the newest month is first.
+### `src/components/monthlog/MonthCard.astro` — the tile
+
+- **The whole card is the link.** `PostCard` couldn't do that because its tag
+  pills are links and a link inside a link is invalid HTML; there is nothing else
+  interactive in a month tile, so the entire target is clickable and the 44px
+  touch minimum comes free.
+- `group` on the `<li>` plus `group-hover:` inside coordinates one hover state
+  across the whole tile: an accent rail scales in from the top-left
+  (`origin-top scale-y-0 → scale-y-100`, a transform so it composites, unlike
+  animating height), the month number and name pick up the accent, and the `Read
+  →` arrow slides.
+- `line-clamp-2` on the title (core Tailwind in v4, no plugin) plus `h-full` on
+  the anchor keeps every tile in a row the same height whatever the title length.
+- `mt-auto` pins the `Read →` affordance to the bottom so it lines up across a
+  row.
+- Shows the month **number** in mono and the month **name** large. The year is
+  the group heading above, so repeating it in the card would be noise.
+
+### `src/pages/monthlog/[month].astro` — one month
+
+- `[month]`, a **single** param — not the `[...slug]` rest param blog and
+  snippets use. Those need a rest param because glob ids keep folder structure
+  and can contain a slash. A month is `YYYY-MM`, enforced by the schema regex, so
+  it's always exactly one segment. Use the narrower pattern when the data
+  guarantees it.
+- Adjacent-month links are computed in `getStaticPaths`, not in the page body —
+  that's the only place with the whole sorted list in hand.
+- **`?? null` on the adjacent lookups is load-bearing, and TypeScript will not
+  tell you so.** `noUncheckedIndexedAccess` is off in this project, so
+  `months[-1]` types as `MonthlogEntry` while being `undefined` at runtime.
+  Without the coalesce the first and last months render a link to
+  `/monthlog/undefined`.
+- Older left, newer right, via `mr-auto` / `ml-auto` on the links themselves so a
+  lone link still lands on its correct side. An empty spacer span would be
+  fragile.
+- Body headings start at `##` here: the entry title is the `h1` on this page. (On
+  the old single-page version they had to be `###`; that constraint is gone, and
+  `_TEMPLATE.mdx` says so.)
+
+**Done when:** the calendar shows year groups newest-first; a month with no
+neighbour on one side renders one link, not a broken one; no `/monthlog/undefined`
+appears in any built page; and the outline is `h1 → h2` on a month page and
+`h1 → h2 (year) → h3 (month)` on the calendar.
 
 ---
 
@@ -374,15 +420,15 @@ pages, and `writing →` still appears on `/`.
 Add monthlog to the existing feed. Snippets stay out — a reference library isn't
 a stream.
 
-- Map monthlog entries to feed items. There's no per-month route, so the link is
-  the anchor on the single page:
+- Map monthlog entries to feed items. Each month has a real route now, so the
+  link is that page — not an anchor:
 
 ```ts
 items: months.map((m) => ({
   title: m.data.title,
   description: m.data.description ?? '',
   pubDate: new Date(`${m.data.month}-01T00:00:00Z`),
-  link: `/monthlog/#${m.data.month}`,
+  link: `/monthlog/${m.data.month}/`,
 }))
 ```
 

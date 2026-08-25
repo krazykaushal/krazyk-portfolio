@@ -1,0 +1,132 @@
+---
+// One month. The calendar at /monthlog links here.
+//
+// `[month]`, a SINGLE param — not the `[...slug]` rest param the blog and
+// snippets use. Those need a rest param because glob ids keep folder structure
+// and can contain a slash; a month is `YYYY-MM`, enforced by the schema regex,
+// so it is always exactly one path segment. Use the narrower pattern when the
+// data guarantees it.
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { render } from 'astro:content';
+
+import Layout from '@/layouts/Layout.astro';
+import Footer from '@/components/ui/Footer.astro';
+import { formatMonth } from '@/lib/content';
+import { getPublishedMonths } from '@/lib/monthlog';
+
+// The adjacent-month links are computed HERE, not in the page body, because this
+// is the only place with the whole sorted list in hand. The page just renders
+// what it's handed.
+export const getStaticPaths = (async () => {
+  const months = await getPublishedMonths(); // newest first
+
+  return months.map((entry, i) => ({
+    params: { month: entry.data.month },
+    props: {
+      entry,
+      // Newest-first ordering means i-1 is the LATER month and i+1 the earlier.
+      //
+      // The `?? null` is load-bearing and TypeScript will not tell you so:
+      // `noUncheckedIndexedAccess` is off in this project, so `months[-1]` types
+      // as MonthlogEntry while being undefined at runtime. Without the
+      // coalesce, the first and last months would render a link to
+      // `/monthlog/undefined`.
+      newer: months[i - 1] ?? null,
+      older: months[i + 1] ?? null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { entry, newer, older } = Astro.props;
+const { month, title, description } = entry.data;
+
+const { Content } = await render(entry);
+---
+
+{/* ogType="article" — dated, authored content, not a landing page. */}
+<Layout
+  title={`${formatMonth(month)} — Kaushal Patel`}
+  description={description ?? `Monthlog for ${formatMonth(month)}.`}
+  ogType="article"
+>
+  {/* Centered column, no avatar lane — reading material. */}
+  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    <a
+      href="/monthlog"
+      data-avatar-react
+      class="font-mono text-sm text-muted transition-colors hover:text-foreground"
+    >
+      ← Calendar
+    </a>
+
+    <article>
+      {/* Header outside .prose on purpose: the typography plugin's
+          `.prose :where(p)` sits at the same specificity as a Tailwind utility,
+          so `font-mono text-xs` on a <p> in here would be decided by stylesheet
+          order rather than by us. */}
+      <header class="mt-8">
+        <p class="font-mono text-sm text-muted">
+          {/* datetime accepts a YYYY-MM "valid month string" per the HTML spec,
+              so the machine-readable value needs no invented day. */}
+          <time datetime={month}>{formatMonth(month)}</time>
+        </p>
+
+        <h1
+          class="mt-2 text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl"
+        >
+          {title}
+        </h1>
+      </header>
+
+      {/* max-w-none because `prose` sets its own 65ch, which would render the
+          body narrower than the h1 above it. The container owns the measure.
+
+          Bodies start their own headings at ## here — on this page the entry
+          title is the h1, so ## is correct. (On the old single-page /monthlog it
+          had to be ###; that constraint is gone with this route, and the
+          _TEMPLATE note has been updated.) */}
+      <div class="prose mt-10 max-w-none">
+        <Content />
+      </div>
+    </article>
+
+    {/* Adjacent months. Older on the left, newer on the right — matching the
+        direction the calendar reads. Each side renders only if that month
+        exists, so the first and last entries simply show one link.
+
+        `justify-between` with an empty span holding the gap would be fragile;
+        instead each link gets `mr-auto` / `ml-auto` so a lone link still lands
+        on its correct side. */}
+    {
+      (older || newer) && (
+        <nav
+          aria-label="Adjacent months"
+          class="mt-16 flex flex-wrap items-center gap-4 border-t border-foreground/10 pt-8 font-mono text-sm"
+        >
+          {older && (
+            <a
+              href={`/monthlog/${older.data.month}`}
+              data-avatar-react
+              class="mr-auto text-muted transition-colors hover:text-foreground"
+            >
+              ← {formatMonth(older.data.month)}
+            </a>
+          )}
+          {newer && (
+            <a
+              href={`/monthlog/${newer.data.month}`}
+              data-avatar-react
+              class="ml-auto text-muted transition-colors hover:text-foreground"
+            >
+              {formatMonth(newer.data.month)} →
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </main>
+
+  <Footer />
+</Layout>

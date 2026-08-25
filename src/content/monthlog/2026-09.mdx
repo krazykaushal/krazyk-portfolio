@@ -8,12 +8,12 @@
 # Yes, this repeats the filename — see the comment in src/content.config.ts.
 month: 2026-09
 
-title: 'A few words on the month'
+title: "A few words on the month"
 
 # Optional. Shows up as the RSS item description.
-description: ''
+description: ""
 
-draft: false
+draft: true
 ---
 
 Just write. This is prose only — there are no `shipped` or `goals` frontmatter
@@ -24,6 +24,8 @@ If the month wants a list, write a markdown list:
 - like this
 - and this
 
-Headings work too, if a month has genuinely separate threads in it. Start at
-`##` — each month gets its own page at `/monthlog/<month>` where the title above
-is the `<h1>`, so `##` sits correctly underneath it.
+Headings work too, if a month has genuinely separate threads in it — but
+**start at `###`, not `##`**. The page renders the entry title as an `<h2>`, so
+`###` is what sits correctly underneath it. A `##` here would come out as a
+sibling of the entry rather than part of it, which is wrong for anyone
+navigating by headings.

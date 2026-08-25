@@ -31,3 +31,40 @@ export async function getPublishedMonths(): Promise<MonthlogEntry[]> {
 
   return months.toSorted((a, b) => b.data.month.localeCompare(a.data.month));
 }
+
+/** One year's worth of entries, for the calendar's year groupings. */
+export type MonthlogYear = {
+  year: string;
+  entries: MonthlogEntry[];
+};
+
+/**
+ * Group entries by year, newest year first, entries newest-first within a year.
+ *
+ * Relies on the input already being sorted (i.e. straight out of
+ * `getPublishedMonths`): a Map preserves insertion order, so walking a
+ * descending list produces descending years for free — no second sort, and no
+ * chance of the year order and the within-year order disagreeing.
+ *
+ * The year is sliced off the `YYYY-MM` string rather than parsed as a Date. Same
+ * reasoning as the sort: the format is fixed by the schema regex, so string
+ * operations are exact and can't drift by a timezone.
+ */
+export function groupByYear(entries: MonthlogEntry[]): MonthlogYear[] {
+  const byYear = new Map<string, MonthlogEntry[]>();
+
+  for (const entry of entries) {
+    const year = entry.data.month.slice(0, 4);
+    const bucket = byYear.get(year);
+    if (bucket) {
+      bucket.push(entry);
+    } else {
+      byYear.set(year, [entry]);
+    }
+  }
+
+  return [...byYear].map(([year, yearEntries]) => ({
+    year,
+    entries: yearEntries,
+  }));
+}

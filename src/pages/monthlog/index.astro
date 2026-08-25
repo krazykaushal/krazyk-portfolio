@@ -1,41 +1,32 @@
 ---
-// Every month on one page, newest first.
+// The calendar. A card per month that exists, grouped by year — no empty cells
+// for months without an entry, so the grid looks right from the first entry
+// rather than after a year of them.
 //
-// One route rather than an index plus a page per month: these entries are short
-// and meant to be read in a run, and anchoring each month gives shareable links
-// (/monthlog#2026-08) without a second route to build.
-import { render } from 'astro:content';
-
+// The month's content lives on its own page now (see [month].astro). This page
+// is navigation only, which is why it renders no MDX at all.
 import Layout from '@/layouts/Layout.astro';
 import Footer from '@/components/ui/Footer.astro';
-import { formatMonth } from '@/lib/content';
-import { getPublishedMonths } from '@/lib/monthlog';
+import MonthCard from '@/components/monthlog/MonthCard.astro';
+import { getPublishedMonths, groupByYear } from '@/lib/monthlog';
 
 const entries = await getPublishedMonths();
 
-// `render()` is per-entry — there's no batch version, and calling it in a loop
-// is fine. Doing it inside one Promise.all means the N compiles happen
-// concurrently rather than one after another, and pairing each Content with its
-// entry here avoids indexing two parallel arrays in the template.
-const months = await Promise.all(
-  entries.map(async (entry) => ({
-    entry,
-    Content: (await render(entry)).Content,
-  })),
-);
+// Already sorted newest-first, so the year groups come out descending too — see
+// the comment on groupByYear for why that falls out of Map ordering.
+const years = groupByYear(entries);
 ---
 
 <Layout
   title="Monthlog — Kaushal Patel"
   description="What I'm working on and thinking about, one entry a month."
 >
-  {/* Centered column, no avatar lane — this is reading material. */}
-  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+  <main class="mx-auto w-full max-w-4xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
     <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
       Monthlog
     </h1>
 
-    <p class="mt-4 text-base leading-relaxed text-muted">
+    <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
       What I'm building, breaking and thinking about — one entry a month.
     </p>
 
@@ -43,54 +34,32 @@ const months = await Promise.all(
       entries.length === 0 ? (
         <p class="mt-10 font-mono text-sm text-muted">Nothing logged yet.</p>
       ) : (
-        <div class="mt-16 flex flex-col gap-20">
-          {/* The anchor target is the SECTION, not the heading, so
-              /monthlog#2026-08 lands on the whole entry.
-
-              scroll-mt-24 is the one piece of new CSS in this feature. An anchor
-              jump aligns the element's top with the viewport top, which would put
-              this under the fixed nav (whose bottom edge sits at 16px + 44px =
-              60px). The /#work links get away with it only because those
-              sections carry py-24; an entry mid-page has no such padding.
-              24 = 96px, clear of it.
-
-              Note this comment sits OUTSIDE the .map() callback on purpose. The
-              callback returns a single parenthesised expression, so a JSX comment
-              placed before <section> would make two sibling nodes and fail to
-              parse. (Writing a literal JSX comment inside this one would also
-              break it — the inner closing marker ends the outer comment.) */}
-          {months.map(({ entry, Content }) => (
-            <section
-              id={entry.data.month}
-              class="scroll-mt-24"
-              aria-labelledby={`title-${entry.data.month}`}
-            >
-              {/* The month is a <p>, NOT a heading. It's a label on the entry,
-                  and making it an h2 with the title as an h3 below put the
-                  body's own `##` headings at the same level as the month —
-                  siblings of the entry rather than children of it. One h2 per
-                  entry, and the body starts at h3. */}
-              <p class="font-mono text-sm text-muted">
-                {/* datetime accepts a YYYY-MM "valid month string" per the HTML
-                    spec, so the machine-readable value needs no invented day. */}
-                <time datetime={entry.data.month}>
-                  {formatMonth(entry.data.month)}
-                </time>
-              </p>
-
+        <div class="mt-16 flex flex-col gap-16">
+          {years.map(({ year, entries: yearEntries }) => (
+            <section aria-labelledby={`year-${year}`}>
+              {/* The year is a real heading — it's a section of the archive, and
+                  it's what a screen-reader user would navigate by. Month names
+                  inside the cards are h3s underneath it. */}
               <h2
-                id={`title-${entry.data.month}`}
-                class="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+                id={`year-${year}`}
+                class="font-mono text-sm tabular-nums text-muted"
               >
-                {entry.data.title}
+                {year}
               </h2>
 
-              {/* max-w-none because `prose` sets its own 65ch, which would make
-                  the body narrower than the headings above it. The container
-                  owns the measure. */}
-              <div class="prose mt-6 max-w-none">
-                <Content />
-              </div>
+              {/* A hairline under the year to make the grouping read as a
+                  calendar band rather than just spacing. */}
+              <div aria-hidden="true" class="mt-3 h-px bg-foreground/10"></div>
+
+              {/* Three across on desktop keeps tiles squarish; two at sm so a
+                  tablet isn't one long column. The grid lives here, not in
+                  MonthCard — the card renders one <li> and lets the caller
+                  choose columns. */}
+              <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {yearEntries.map((entry) => (
+                  <MonthCard entry={entry} headingLevel={3} />
+                ))}
+              </ul>
             </section>
           ))}
         </div>
