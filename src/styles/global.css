@@ -47,6 +47,23 @@
    visitors get an instant jump instead. */
 html {
   scroll-behavior: smooth;
+
+  /* Base size for the whole design. It goes on `html`, not `body`, because
+     Tailwind's scales are all rem-based (--text-sm is .875rem, --spacing is
+     .25rem) and rem resolves against the ROOT element. On `body` it would do
+     almost nothing here: every piece of text on the site carries an explicit
+     text-* utility, and `.prose` pins itself to font-size: 1rem, so there is
+     nothing left to inherit it.
+
+     Consequence worth knowing: this scales spacing and max-widths too, not just
+     type. `p-6` becomes 27px rather than 24px. That's the point — the whole
+     design steps up 12.5% together instead of the text outgrowing its padding.
+
+     A *relative* unit rather than `18px` on purpose: 1.125rem is 1.125x the
+     visitor's own browser default, so someone who has set a larger base size
+     still gets their preference, scaled. A pixel value would silently throw it
+     away. */
+  font-size: 1.125rem;
 }
 
 body {
