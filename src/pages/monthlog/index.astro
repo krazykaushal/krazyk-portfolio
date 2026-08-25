@@ -44,30 +44,46 @@ const months = await Promise.all(
         <p class="mt-10 font-mono text-sm text-muted">Nothing logged yet.</p>
       ) : (
         <div class="mt-16 flex flex-col gap-20">
-          {months.map(({ entry, Content }) => (
-            <section aria-labelledby={`heading-${entry.data.month}`}>
-              {/* The id is the anchor target, so /monthlog#2026-08 works.
+          {/* The anchor target is the SECTION, not the heading, so
+              /monthlog#2026-08 lands on the whole entry.
 
-                  scroll-mt-24 is the one piece of new CSS in this feature. An
-                  anchor jump aligns the element's top with the viewport top,
-                  which would put this heading *under* the fixed nav (whose
-                  bottom edge sits at 16px + 44px = 60px). The /#work links get
-                  away with it only because those sections carry py-24; a
-                  heading mid-page has no such padding. 24 = 96px, clear of it. */}
-              <h2
-                id={entry.data.month}
-                class="scroll-mt-24 font-mono text-sm text-muted"
-              >
+              scroll-mt-24 is the one piece of new CSS in this feature. An anchor
+              jump aligns the element's top with the viewport top, which would put
+              this under the fixed nav (whose bottom edge sits at 16px + 44px =
+              60px). The /#work links get away with it only because those
+              sections carry py-24; an entry mid-page has no such padding.
+              24 = 96px, clear of it.
+
+              Note this comment sits OUTSIDE the .map() callback on purpose. The
+              callback returns a single parenthesised expression, so a JSX comment
+              placed before <section> would make two sibling nodes and fail to
+              parse. (Writing a literal JSX comment inside this one would also
+              break it — the inner closing marker ends the outer comment.) */}
+          {months.map(({ entry, Content }) => (
+            <section
+              id={entry.data.month}
+              class="scroll-mt-24"
+              aria-labelledby={`title-${entry.data.month}`}
+            >
+              {/* The month is a <p>, NOT a heading. It's a label on the entry,
+                  and making it an h2 with the title as an h3 below put the
+                  body's own `##` headings at the same level as the month —
+                  siblings of the entry rather than children of it. One h2 per
+                  entry, and the body starts at h3. */}
+              <p class="font-mono text-sm text-muted">
                 {/* datetime accepts a YYYY-MM "valid month string" per the HTML
                     spec, so the machine-readable value needs no invented day. */}
                 <time datetime={entry.data.month}>
                   {formatMonth(entry.data.month)}
                 </time>
-              </h2>
+              </p>
 
-              <h3 class="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h2
+                id={`title-${entry.data.month}`}
+                class="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+              >
                 {entry.data.title}
-              </h3>
+              </h2>
 
               {/* max-w-none because `prose` sets its own 65ch, which would make
                   the body narrower than the headings above it. The container
