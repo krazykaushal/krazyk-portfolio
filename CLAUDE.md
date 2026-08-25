@@ -12,7 +12,7 @@ A personal portfolio website built around a **rigged 2D avatar** of the owner th
 
 There is also a **blog**: MDX posts in an Astro content collection, at `/blog`.
 
-> **Companion files:** `AGENTS.md` holds up-to-date Astro conventions for coding agents. Treat it as authoritative for Astro framework idioms and follow it alongside this file. `BLOG.md` is the blog build sheet — now a record of what shipped and, more usefully, what was decided to be **out of scope**. This CLAUDE.md owns the _project intent, working agreement, and avatar design_; AGENTS.md owns _framework specifics_.
+> **Companion files:** `AGENTS.md` holds up-to-date Astro conventions for coding agents. Treat it as authoritative for Astro framework idioms and follow it alongside this file. `BLOG.md` is the blog build sheet — now a record of what shipped and, more usefully, what was decided to be **out of scope**. `WRITING.md` is the live build sheet: `snippets` and `monthlog` collections plus the home-page Writing section becoming their hub. This CLAUDE.md owns the _project intent, working agreement, and avatar design_; AGENTS.md owns _framework specifics_.
 
 **History:** this started life as a Next.js App Router app (see `../krazyk-portfolio`) and was ported to Astro. The mapping table below is the record of that port — consult it before assuming how something used to work.
 
