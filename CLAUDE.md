@@ -87,7 +87,6 @@ src/
       Contact.astro      # static shell around the form island
       ContactForm.tsx    # island — form state
     ui/
-      Cursor.astro       # dot + ring follower (<script>)
       Footer.astro
       HeroBackground.astro # drifting grid canvas (<script>)
       Nav.astro          # fixed header nav; hosts ThemeToggle
@@ -120,7 +119,6 @@ Current split, and why:
 
 | `.astro` + `<script>`  | Why React wasn't needed              |
 | ---------------------- | ------------------------------------ |
-| `Cursor.astro`         | refs + window listeners, no state    |
 | `HeroBackground.astro` | canvas + rAF, no state               |
 | `ThemeToggle.astro`    | toggles a class; the UI is pure CSS  |
 | `Reveal.astro`         | wraps children via `<slot />`        |
@@ -174,7 +172,7 @@ Rules:
 - Only one "active" intentional animation at a time; cursor-tracking can run underneath idle.
 - Every animation should have a _reason_ tied to a user action or app state. No animation for its own sake.
 - Respect `prefers-reduced-motion`: fall back to a calm static avatar.
-- `[data-avatar-react]` is the one shared definition of "interactive" on this site — both the avatar and the custom cursor read it. Add the attribute to new interactive elements rather than inventing a second list.
+- `[data-avatar-react]` is the one shared definition of "interactive" on this site. Only the avatar reads it now (a custom dot+ring cursor did too, until it was removed), but it stays the single list — add the attribute to new interactive elements rather than inventing a second one.
 
 ---
 
@@ -236,7 +234,7 @@ Phases 0–6 were completed on the Next.js version; the feature set carried over
 - **`.astro` frontmatter runs at build time.** It has no `window`/`document`, and its values are baked into the HTML — that's why `Footer.astro` can call `new Date()` safely, and why `<script>` tags can't close over frontmatter variables (pass values through `data-*` attributes instead).
 - **The pre-paint theme script needs `is:inline`.** Without it Astro hoists it into a deferred module bundle that runs after first paint — which is exactly the flash of the wrong theme we're avoiding.
 - A component's `<script>` runs **once per page**, not once per instance. Query all matching elements.
-- Module scripts are deferred, so the DOM is fully parsed when they run — including island markup, which Astro server-renders before hydrating the same nodes in place. That's why `Cursor.astro` can find `[data-avatar-react]` elements that live inside islands.
+- Module scripts are deferred, so the DOM is fully parsed when they run — including island markup, which Astro server-renders before hydrating the same nodes in place. That's what lets a plain `<script>` query `[data-avatar-react]` elements that live inside islands.
 - Islands don't share React state with each other. Anything cross-island travels through the DOM or an event — plan for that before splitting a stateful feature across two islands.
 - Watch GSAP double-mounting in React StrictMode — `useGSAP` handles cleanup; verify animations don't stack.
 - **`ThemeToggle` no longer positions itself.** It used to be `fixed right-4 top-4`; `Nav.astro` places it now. If you use it somewhere else, that somewhere else owns the layout.

@@ -54,16 +54,6 @@ body {
   color: var(--foreground);
 }
 
-/* Custom cursor: Cursor.astro adds .cursor-none to <html> only when the JS
-   follower is active (pointer: fine + motion allowed), so we hide the OS cursor
-   everywhere. !important overrides per-element cursors (buttons, the avatar's
-   cursor: pointer). Touch / reduced-motion users never get the class, so they
-   keep their native cursor. */
-.cursor-none,
-.cursor-none * {
-  cursor: none !important;
-}
-
 /* Reduced-motion safety net. The avatar's GSAP animations are already gated in
    JS via matchMedia; this covers CSS transitions/animations + smooth scroll for
    anyone who asks the OS to minimize motion. */
