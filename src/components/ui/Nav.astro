@@ -8,7 +8,7 @@
 // is the one part of the page that should feel open.
 //
 // Static: the only JavaScript on this bar is the theme toggle's own <script>.
-import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import ThemeToggle from "@/components/ui/ThemeToggle.astro";
 
 // `Astro.url` is the URL of the page currently being generated — available in
 // frontmatter because that runs at build time, once per page. That's what lets
@@ -17,34 +17,36 @@ import ThemeToggle from '@/components/ui/ThemeToggle.astro';
 //
 // Trailing slashes are normalized because whether a built path ends in one
 // depends on the `trailingSlash` config, and this comparison shouldn't care.
-const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const onBlog = pathname === '/blog' || pathname.startsWith('/blog/');
+const pathname = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const onBlog = pathname === "/blog" || pathname.startsWith("/blog/");
 
 // Anchors MUST be absolute. A bare `#work` from /blog/hello-world resolves
 // against the current page and scrolls nowhere — the section isn't there.
 const links = [
-  { href: '/#work', label: 'work' },
-  { href: '/#writing', label: 'writing' },
-  { href: '/#contact', label: 'contact' },
+  { href: "/#work", label: "/#work" },
+  { href: "/#writing", label: "/#writing" },
+  { href: "/#contact", label: "/#contact" },
 ];
 
 // At 375px the toggle is ~150px wide, which leaves no room for three 44px touch
 // targets. So mobile gets exactly one link, and which one depends on where you
 // are — the single most useful move from here.
 const mobileLink =
-  pathname === '/blog'
-    ? { href: '/', label: '← home' }
+  pathname === "/blog"
+    ? { href: "/", label: "← /home" }
     : onBlog
-      ? { href: '/blog', label: '← writing' }
-      : { href: '/#writing', label: 'writing →' };
+      ? { href: "/blog", label: "← /writing" }
+      : { href: "/#writing", label: "/writing →" };
 
 const LINK_BASE =
-  'h-11 items-center rounded-md px-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
+  "h-11 items-center rounded-md px-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
 ---
 
-{/* <header> + <nav> are the landmarks a screen reader navigates by. z-50 keeps
+{
+  /* <header> + <nav> are the landmarks a screen reader navigates by. z-50 keeps
     it above the sticky avatar lane. `inset-x-0` + justify-between pins the pill
-    left and the toggle right without either knowing the other's width. */}
+    left and the toggle right without either knowing the other's width. */
+}
 <header
   class="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 px-4 py-4"
 >
@@ -52,30 +54,38 @@ const LINK_BASE =
     aria-label="Main"
     class="flex items-center rounded-md border border-foreground/15 bg-surface/80 px-1 font-mono text-xs shadow-sm backdrop-blur"
   >
-    {/* Mobile only. `sm:hidden` — mobile-first: the base state is visible, the
-        breakpoint takes it away. */}
+    {
+      /* Mobile only. `sm:hidden` — mobile-first: the base state is visible, the
+        breakpoint takes it away. */
+    }
     <a
       href={mobileLink.href}
       data-avatar-react
-      class:list={['inline-flex sm:hidden', LINK_BASE, 'text-muted hover:text-foreground']}
+      class:list={[
+        "inline-flex sm:hidden",
+        LINK_BASE,
+        "text-muted hover:text-foreground",
+      ]}
     >
       {mobileLink.label}
     </a>
 
-    {/* sm: and up — the full set. No aria-current anywhere in here: all three
+    {
+      /* sm: and up — the full set. No aria-current anywhere in here: all three
         are in-page anchors pointing at sections of `/`, and aria-current="page"
         is only truthful for a link pointing at the page you're actually on.
         Marking an anchor as the current page would be a lie to a screen
-        reader. */}
+        reader. */
+    }
     {
       links.map((link) => (
         <a
           href={link.href}
           data-avatar-react
           class:list={[
-            'hidden sm:inline-flex',
+            "hidden sm:inline-flex",
             LINK_BASE,
-            'text-muted hover:text-foreground',
+            "text-muted hover:text-foreground",
           ]}
         >
           {link.label}
@@ -84,7 +94,9 @@ const LINK_BASE =
     }
   </nav>
 
-  {/* The toggle used to position itself `fixed right-4 top-4`. It now lives
-      here, so the bar owns placement and the button is just a button. */}
+  {
+    /* The toggle used to position itself `fixed right-4 top-4`. It now lives
+      here, so the bar owns placement and the button is just a button. */
+  }
   <ThemeToggle />
 </header>
