@@ -1,0 +1,36 @@
+---
+month: 2026-08
+title: 'Rebuilding the site, and relearning the basics'
+description: 'Ported the portfolio from Next.js to Astro, then built a blog and a snippet library on top of it.'
+draft: false
+---
+
+Most of this month went into this site. It was a Next.js App Router app; it now
+runs on Astro, and the interesting part wasn't the migration itself — it was how
+much of the original I couldn't justify keeping.
+
+Four components moved off React entirely once I made myself answer "what is
+React actually doing here?" for each one. The answer, three times out of four,
+was nothing: refs and event listeners and GSAP, no state, no reconciliation. A
+plain `<script>` tag does that.
+
+## What got built
+
+- The blog: MDX in a content collection, tag pages, an RSS feed
+- A snippet library, filed by language, so I stop re-deriving the same debounce
+- A nav, which the site suddenly needed once it stopped being one page
+
+## What I got wrong
+
+Plenty, and the useful ones were all the same shape — code that looked right and
+did nothing. A honeypot field that never reached the server because the form
+submitted from React state instead of the DOM. A `.toSorted()` call whose result
+I threw away. A regex passed as a string, so `\s+` quietly became the literal
+`s+`.
+
+None of those fail a typecheck. That's the lesson I want to keep: the bugs worth
+fearing aren't the ones that crash.
+
+## Next
+
+Deploy it, measure it, and write more than I refactor.

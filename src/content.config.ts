@@ -120,6 +120,33 @@ const snippets = defineCollection({
   }),
 });
 
+// ---------------------------------------------------------------------------
+// monthlog — what I'm doing, one entry a month. Prose only.
+//
+// No `shipped`/`learning`/`goals` arrays: frontmatter arrays only earn their
+// place when something *queries* them, and nothing here would. Markdown already
+// has lists, so a month that wants bullets just writes them in the body.
+// ---------------------------------------------------------------------------
+const monthlog = defineCollection({
+  loader: glob({ pattern: "**/[^_]*.mdx", base: "./src/content/monthlog" }),
+
+  schema: z.object({
+    // Files are named `2026-08.mdx`, so the entry `id` is already "2026-08" —
+    // the same value as this field. That redundancy is deliberate: the id is a
+    // filesystem accident, while this is a declared value the schema can
+    // validate. A file named `august.mdx` would give a "month" of `august`, and
+    // this regex is what catches it.
+    month: z.string().regex(/^\d{4}-\d{2}$/, "month must be YYYY-MM"),
+
+    title: z.string(),
+
+    // Used for the RSS item description when this lands in the feed.
+    description: z.string().optional(),
+
+    draft: z.boolean().default(false),
+  }),
+});
+
 // The export names are the collection names: this is what makes
 // getCollection('blog') work, and what types CollectionEntry<'blog'>.
-export const collections = { blog, snippets };
+export const collections = { blog, snippets, monthlog };

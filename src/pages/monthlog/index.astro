@@ -1,0 +1,86 @@
+---
+// Every month on one page, newest first.
+//
+// One route rather than an index plus a page per month: these entries are short
+// and meant to be read in a run, and anchoring each month gives shareable links
+// (/monthlog#2026-08) without a second route to build.
+import { render } from 'astro:content';
+
+import Layout from '@/layouts/Layout.astro';
+import Footer from '@/components/ui/Footer.astro';
+import { formatMonth } from '@/lib/content';
+import { getPublishedMonths } from '@/lib/monthlog';
+
+const entries = await getPublishedMonths();
+
+// `render()` is per-entry — there's no batch version, and calling it in a loop
+// is fine. Doing it inside one Promise.all means the N compiles happen
+// concurrently rather than one after another, and pairing each Content with its
+// entry here avoids indexing two parallel arrays in the template.
+const months = await Promise.all(
+  entries.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+  })),
+);
+---
+
+<Layout
+  title="Monthlog — Kaushal Patel"
+  description="What I'm working on and thinking about, one entry a month."
+>
+  {/* Centered column, no avatar lane — this is reading material. */}
+  <main class="mx-auto w-full max-w-3xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      Monthlog
+    </h1>
+
+    <p class="mt-4 text-base leading-relaxed text-muted">
+      What I'm building, breaking and thinking about — one entry a month.
+    </p>
+
+    {
+      entries.length === 0 ? (
+        <p class="mt-10 font-mono text-sm text-muted">Nothing logged yet.</p>
+      ) : (
+        <div class="mt-16 flex flex-col gap-20">
+          {months.map(({ entry, Content }) => (
+            <section aria-labelledby={`heading-${entry.data.month}`}>
+              {/* The id is the anchor target, so /monthlog#2026-08 works.
+
+                  scroll-mt-24 is the one piece of new CSS in this feature. An
+                  anchor jump aligns the element's top with the viewport top,
+                  which would put this heading *under* the fixed nav (whose
+                  bottom edge sits at 16px + 44px = 60px). The /#work links get
+                  away with it only because those sections carry py-24; a
+                  heading mid-page has no such padding. 24 = 96px, clear of it. */}
+              <h2
+                id={entry.data.month}
+                class="scroll-mt-24 font-mono text-sm text-muted"
+              >
+                {/* datetime accepts a YYYY-MM "valid month string" per the HTML
+                    spec, so the machine-readable value needs no invented day. */}
+                <time datetime={entry.data.month}>
+                  {formatMonth(entry.data.month)}
+                </time>
+              </h2>
+
+              <h3 class="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {entry.data.title}
+              </h3>
+
+              {/* max-w-none because `prose` sets its own 65ch, which would make
+                  the body narrower than the headings above it. The container
+                  owns the measure. */}
+              <div class="prose mt-6 max-w-none">
+                <Content />
+              </div>
+            </section>
+          ))}
+        </div>
+      )
+    }
+  </main>
+
+  <Footer />
+</Layout>

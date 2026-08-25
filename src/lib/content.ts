@@ -32,3 +32,28 @@ export function formatDate(date: Date): string {
     timeZone: "UTC",
   }).format(date);
 }
+
+/**
+ * Format a `YYYY-MM` month for display: `'2026-08'` → "August 2026".
+ *
+ * Takes a string rather than a Date because that's how `monthlog` stores it —
+ * `YYYY-MM` sorts correctly with a plain string comparison, so ordering needs no
+ * Date at all. Only display does.
+ *
+ * The `-01T00:00:00Z` suffix is load-bearing. `new Date('2026-01')` parses as
+ * midnight UTC, and formatting that in any timezone behind UTC renders
+ * *December 2025* — a bug that only shows up in January and only for some
+ * visitors. Spelling out the day and the Z, plus `timeZone: 'UTC'` below, makes
+ * the whole path timezone-independent.
+ *
+ * Locale is pinned for the same reason as `formatDate`: this runs at build time.
+ */
+export function formatMonth(month: string): string {
+  const date = new Date(`${month}-01T00:00:00Z`);
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
