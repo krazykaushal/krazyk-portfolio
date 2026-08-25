@@ -15,12 +15,31 @@
 // (Astro inlines PUBLIC_* vars at build time, so changing it takes effect on
 // the next deploy — same semantics as Next's NEXT_PUBLIC_ prefix.)
 interface Props {
+  /**
+   * How the links stack.
+   *
+   *   'rail' (default) — a horizontal strip on mobile, a vertical rail from md
+   *                      up. This is the avatar-lane shape: beside the avatar
+   *                      on a wide screen, under it on a narrow one.
+   *   'row'            — horizontal at every width. For anywhere that isn't
+   *                      that lane, e.g. inside a blog post body.
+   *
+   * This has to be a prop rather than something the caller passes as a class.
+   * `md:flex-col` here and `md:flex-row` from the parent are two utilities
+   * setting the same property at the same specificity, so which one wins is
+   * decided by their order in Tailwind's generated stylesheet — not by the
+   * order you write them in the attribute. A prop makes it a decision instead
+   * of a coin toss.
+   */
+  orientation?: 'rail' | 'row';
   // Lets the parent add layout classes (e.g. spacing) without this component
   // having to know about its surroundings.
   class?: string;
 }
 
-const { class: className = '' } = Astro.props;
+const { orientation = 'rail', class: className = '' } = Astro.props;
+
+const directionClass = orientation === 'rail' ? 'flex-row md:flex-col' : 'flex-row';
 
 // Set PUBLIC_RESUME_URL in .env locally and in your host's project settings.
 // When it's missing we omit the link rather than render a dead one.
@@ -33,10 +52,13 @@ const linkClass =
 ---
 
 {/* A list, semantically — it's a set of related links. aria-label names the
-    group for screen readers. Mobile-first: a horizontal row by default (a
-    thumb-friendly strip under the avatar), switching to a vertical rail beside
-    the avatar from md up. Any parent classes are folded in. */}
-<ul aria-label="Social links" class:list={['flex flex-row items-center gap-1 md:flex-col', className]}>
+    group for screen readers. Mobile-first: horizontal is the base in both
+    orientations; only 'rail' adds the md: override. Any parent classes are
+    folded in. */}
+<ul
+  aria-label="Social links"
+  class:list={['flex items-center gap-1', directionClass, className]}
+>
   {/* ---------- GitHub ---------- */}
   <li>
     <a
