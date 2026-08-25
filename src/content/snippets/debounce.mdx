@@ -1,0 +1,41 @@
+---
+title: 'Debounce, typed'
+description: 'Delay a call until the caller stops calling — with the argument types preserved.'
+language: typescript
+tags: ['utilities', 'Performance']
+addedDate: 2026-08-25
+source: 'https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout'
+draft: false
+---
+
+Reach for this when something fires far more often than it needs to act —
+`resize`, `input`, a search-as-you-type. The call only lands once the caller
+goes quiet for `wait` milliseconds.
+
+```ts
+export function debounce<Args extends unknown[]>(
+  fn: (...args: Args) => void,
+  wait = 300,
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  return (...args: Args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
+}
+```
+
+The generic is the part worth keeping. `Args extends unknown[]` captures the
+wrapped function's parameters, so the returned function is checked against the
+same signature — a plain `(...args: any[])` would take anything and give up all
+the type safety at the call site.
+
+`ReturnType<typeof setTimeout>` instead of `number` because Node types it as a
+`Timeout` object while the browser types it as a number. This spells "whatever
+this environment's `setTimeout` returns" and compiles in both.
+
+One trap: the timer lives in the closure, so **one debounced function per
+thing you're debouncing**. Calling `debounce(fn)` fresh inside a React render or
+an event handler creates a new timer every time and nothing is ever actually
+debounced.

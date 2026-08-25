@@ -70,6 +70,56 @@ const blog = defineCollection({
       }),
 });
 
-// The export name is the collection name: this is what makes
+// ---------------------------------------------------------------------------
+// snippets — a personal code reference. Different enough from `blog` to deserve
+// its own schema: a snippet needs a language, and doesn't need a hero image or a
+// reading time.
+// ---------------------------------------------------------------------------
+const snippets = defineCollection({
+  loader: glob({ pattern: "**/[^_]*.mdx", base: "./src/content/snippets" }),
+
+  // A plain object (not a function) because snippets have no images to
+  // validate — the `image()` helper is the only reason `blog` needs the
+  // function form.
+  schema: z.object({
+    title: z.string(),
+
+    // One line: what this is for. Optional because some snippets are
+    // self-explanatory from the title and the code.
+    description: z.string().optional(),
+
+    // A closed set, NOT z.string(). This is the whole reason for having a
+    // language axis: writing `ts` one day and `typescript` the next would
+    // silently produce a second browse page with one item in it. As an enum it
+    // is a build error instead. Add a member when you write that language.
+    language: z.enum(["typescript", "python", "bash", "css", "sql", "astro"]),
+
+    // Free-form, for everything the language axis doesn't capture: work,
+    // personal, a project name, a topic. Lowercased here so casing can never
+    // fork a tag — same transform as `blog`, normalised once in the schema
+    // rather than in every consumer.
+    tags: z
+      .array(z.string())
+      .default([])
+      .transform((tags) => tags.map((t) => t.toLowerCase())),
+
+    // When it entered the library. `addedDate` rather than `pubDate` because
+    // nothing here is "published" in the blog sense.
+    addedDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+
+    // Where it came from, when it came from somewhere. Validating the format
+    // means a typo'd link fails the build rather than shipping a dead anchor.
+    //
+    // `z.url()`, not `z.string().url()` — Astro bundles Zod 4, which moved the
+    // string formats to top-level functions and deprecated the chained methods.
+    // `astro check` flags the old spelling as a deprecation hint.
+    source: z.url().optional(),
+
+    draft: z.boolean().default(false),
+  }),
+});
+
+// The export names are the collection names: this is what makes
 // getCollection('blog') work, and what types CollectionEntry<'blog'>.
-export const collections = { blog };
+export const collections = { blog, snippets };
