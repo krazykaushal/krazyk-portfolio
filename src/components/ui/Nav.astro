@@ -11,9 +11,9 @@
 import ThemeToggle from '@/components/ui/ThemeToggle.astro';
 
 // `Astro.url` is the URL of the page currently being generated — available in
-// frontmatter because that runs at build time, once per page. So "which link is
-// active" is decided at build time and baked into each HTML file; no client-side
-// route matching, no JS.
+// frontmatter because that runs at build time, once per page. That's what lets
+// the mobile link below differ per page with no client-side route matching and
+// no JS: each HTML file is built with its own answer baked in.
 //
 // Trailing slashes are normalized because whether a built path ends in one
 // depends on the `trailingSlash` config, and this comparison shouldn't care.
@@ -24,7 +24,7 @@ const onBlog = pathname === '/blog' || pathname.startsWith('/blog/');
 // against the current page and scrolls nowhere — the section isn't there.
 const links = [
   { href: '/#work', label: 'work' },
-  { href: '/blog', label: 'writing' },
+  { href: '/#writing', label: 'writing' },
   { href: '/#contact', label: 'contact' },
 ];
 
@@ -36,7 +36,7 @@ const mobileLink =
     ? { href: '/', label: '← home' }
     : onBlog
       ? { href: '/blog', label: '← writing' }
-      : { href: '/blog', label: 'writing →' };
+      : { href: '/#writing', label: 'writing →' };
 
 const LINK_BASE =
   'h-11 items-center rounded-md px-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
@@ -62,30 +62,25 @@ const LINK_BASE =
       {mobileLink.label}
     </a>
 
-    {/* sm: and up — the full set. */}
+    {/* sm: and up — the full set. No aria-current anywhere in here: all three
+        are in-page anchors pointing at sections of `/`, and aria-current="page"
+        is only truthful for a link pointing at the page you're actually on.
+        Marking an anchor as the current page would be a lie to a screen
+        reader. */}
     {
-      links.map((link) => {
-        // aria-current="page" is only truthful for a link pointing at the page
-        // you're on. The /#work and /#contact links are in-page anchors, not
-        // pages, so they never get it. Passing `undefined` omits the attribute
-        // entirely — Astro drops null/undefined attributes.
-        const isCurrent = link.href === '/blog' && onBlog;
-
-        return (
-          <a
-            href={link.href}
-            data-avatar-react
-            aria-current={isCurrent ? 'page' : undefined}
-            class:list={[
-              'hidden sm:inline-flex',
-              LINK_BASE,
-              isCurrent ? 'text-foreground' : 'text-muted hover:text-foreground',
-            ]}
-          >
-            {link.label}
-          </a>
-        );
-      })
+      links.map((link) => (
+        <a
+          href={link.href}
+          data-avatar-react
+          class:list={[
+            'hidden sm:inline-flex',
+            LINK_BASE,
+            'text-muted hover:text-foreground',
+          ]}
+        >
+          {link.label}
+        </a>
+      ))
     }
   </nav>
 
