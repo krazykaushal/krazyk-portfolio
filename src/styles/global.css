@@ -37,7 +37,7 @@
   /* Both variables are defined on :root by Astro's <Font> component in
      Layout.astro (the next/font replacement). `@theme inline` keeps them as
      var() references rather than copying the value, so order doesn't matter. */
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-nunito);
   --font-mono: var(--font-geist-mono);
 }
 

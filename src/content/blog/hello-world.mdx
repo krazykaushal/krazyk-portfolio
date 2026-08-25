@@ -1,12 +1,12 @@
 ---
-title: 'Porting a portfolio from Next.js to Astro'
-description: 'What changed, what got simpler, and the one whitespace gotcha that cost me twenty minutes.'
+title: "Porting a portfolio from Next.js to Astro"
+description: "What changed, what got simpler, and the one whitespace gotcha that cost me twenty minutes."
 pubDate: 2026-08-24
-tags: ['astro', 'react', 'notes']
+tags: ["astro", "react", "notes"]
 draft: false
 ---
 
-import SocialLinks from '@/components/ui/SocialLinks.astro';
+import SocialLinks from "@/components/ui/SocialLinks.astro";
 
 This site used to be a Next.js App Router app. It now runs on Astro, and the
 diff was smaller than I expected — most of the work was deciding which
@@ -31,7 +31,7 @@ with genuine `useState`: the typing terminal and the contact form.
 ## Hydration moved to the call site
 
 In Next, a component declared its own environment with `'use client'` at the
-top of the file. In Astro the component stays neutral and the *usage* decides:
+top of the file. In Astro the component stays neutral and the _usage_ decides:
 
 ```astro
 <Hero client:load />

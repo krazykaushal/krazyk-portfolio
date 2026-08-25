@@ -29,13 +29,16 @@ export default defineConfig({
   // Astro's Fonts API — the `next/font/google` replacement. Astro downloads the
   // files at build time, self-hosts them, and exposes each family as a CSS
   // variable that `global.css` maps onto Tailwind's --font-sans / --font-mono.
-  // `weight: '100 900'` pulls the single variable font file for the whole range.
+  // A weight *range* (rather than a list) pulls one variable font file covering it.
   fonts: [
     {
       provider: fontProviders.google(),
-      name: "Geist",
-      cssVariable: "--font-geist-sans",
-      weights: ["100 900"],
+      name: "Nunito",
+      cssVariable: "--font-nunito",
+      // Nunito's variable axis is 200-1000 (Geist's was 100-900) — asking for a
+      // range the family doesn't have is how you end up with a synthesized,
+      // smeared bold instead of a real one.
+      weights: ["200 1000"],
       subsets: ["latin"],
     },
     {

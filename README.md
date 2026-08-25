@@ -14,7 +14,7 @@ to keep that avatar feeling alive.
 - **Framework:** Astro (static output, TypeScript) with React islands
 - **Styling:** Tailwind CSS v4 — CSS-first `@theme` tokens, class-based dark mode
 - **Animation:** GSAP + ScrollTrigger, SplitText, ScrambleText (`useGSAP` in islands, plain `<script>` elsewhere)
-- **Fonts:** Geist + Geist Mono, self-hosted via Astro's Fonts API
+- **Fonts:** Nunito + Geist Mono, self-hosted via Astro's Fonts API
 - **Avatar:** hand-layered inline SVG, each group animated independently by ref
 - **Hosting:** Vercel
 

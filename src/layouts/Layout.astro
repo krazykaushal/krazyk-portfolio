@@ -69,11 +69,11 @@ const themeScript = `(function(){try{var s=localStorage.getItem('theme');var d=s
     <script is:inline set:html={themeScript} />
 
     {
-      /* Self-hosted Geist + Geist Mono, from the `fonts` config in
+      /* Self-hosted Nunito + Geist Mono, from the `fonts` config in
         astro.config.mjs. `preload` emits preload links for the font files so
         text doesn't wait on the CSS round-trip. */
     }
-    <Font cssVariable="--font-geist-sans" preload />
+    <Font cssVariable="--font-nunito" preload />
     <Font cssVariable="--font-geist-mono" />
 
     <title>{title}</title>
