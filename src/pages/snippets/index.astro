@@ -1,0 +1,90 @@
+---
+// The snippet index, plus the way into the language browse pages.
+//
+// A centered column rather than the home page's two-lane sticky-avatar shell.
+// See the note at the bottom of this file — that's a decision left open on
+// purpose, not an oversight.
+import Layout from '@/layouts/Layout.astro';
+import Footer from '@/components/ui/Footer.astro';
+import SnippetCard from '@/components/snippets/SnippetCard.astro';
+import {
+  getPublishedSnippets,
+  allLanguages,
+  languageCounts,
+} from '@/lib/snippets';
+
+const snippets = await getPublishedSnippets();
+
+// Both derived from the same single read — all of this happens at build time,
+// so the filter row's counts can never drift from the grid below it.
+const languages = allLanguages(snippets);
+const counts = languageCounts(snippets);
+---
+
+<Layout
+  title="Snippets — Kaushal Patel"
+  description="Code I keep coming back to, filed by language."
+>
+  <main class="mx-auto w-full max-w-4xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      Snippets
+    </h1>
+
+    <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+      Code I keep coming back to. Mostly for me — filed by language so I can
+      find it again.
+    </p>
+
+    {
+      snippets.length === 0 ? (
+        /* An empty grid under a heading reads as broken rather than as "nothing
+           here yet". Same reasoning as /blog. */
+        <p class="mt-10 font-mono text-sm text-muted">Nothing filed yet.</p>
+      ) : (
+        <>
+          {/* The filter row. `nav` + aria-label because this is navigation, not
+              decoration — a screen reader should be able to jump to it. */}
+          <nav aria-label="Browse by language" class="mt-10">
+            <ul class="flex flex-wrap gap-2">
+              {languages.map((language) => (
+                <li>
+                  {/* pointer-coarse: grows these to 44px on touch devices only,
+                      leaving desktop density alone — same trick as PostCard's
+                      tag pills. These ARE links, so they need it. */}
+                  <a
+                    href={`/snippets/languages/${language}`}
+                    class="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 font-mono text-xs font-medium text-accent transition-colors hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent pointer-coarse:min-h-11 pointer-coarse:px-4"
+                  >
+                    {language}
+                    <span class="text-accent/60">{counts.get(language)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* The grid lives here, not in SnippetCard — the card renders one
+              <li> and lets each caller choose its own columns. */}
+          <ul class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {snippets.map((snippet) => (
+              <SnippetCard snippet={snippet} headingLevel={2} />
+            ))}
+          </ul>
+        </>
+      )
+    }
+  </main>
+
+  <Footer />
+</Layout>
+
+{
+  /* TODO(you), your call: /blog uses the two-lane sticky-avatar shell, and the
+     comment in src/pages/blog/index.astro says a THIRD page wanting it is the
+     moment to extract PageShell.astro. This page is that third candidate, and
+     the centered column above dodges the decision rather than making it.
+
+     If you'd rather these listing pages all carry the avatar: extract
+     src/components/ui/PageShell.astro with a <slot /> for the content lane
+     FIRST, then use it in all three. Don't paste the shell a third time. */
+}
