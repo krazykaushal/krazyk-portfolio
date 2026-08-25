@@ -63,7 +63,7 @@ html {
      visitor's own browser default, so someone who has set a larger base size
      still gets their preference, scaled. A pixel value would silently throw it
      away. */
-  font-size: 1.125rem;
+  font-size: 1.1rem;
 }
 
 body {
@@ -133,8 +133,37 @@ body {
   --tw-prose-quote-borders: color-mix(in oklab, var(--accent) 40%, transparent);
   --tw-prose-bullets: color-mix(in oklab, var(--foreground) 30%, transparent);
   --tw-prose-hr: color-mix(in oklab, var(--foreground) 10%, transparent);
-  --tw-prose-th-borders: color-mix(in oklab, var(--foreground) 20%, transparent);
-  --tw-prose-td-borders: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --tw-prose-th-borders: color-mix(
+    in oklab,
+    var(--foreground) 20%,
+    transparent
+  );
+  --tw-prose-td-borders: color-mix(
+    in oklab,
+    var(--foreground) 10%,
+    transparent
+  );
+}
+
+/* Justified body copy in long-form posts.
+   
+   Paragraphs ONLY — not headings, list items, or code. `text-align` inherits, so
+   putting `justify` on `.prose` itself would push it into every descendant; a
+   justified heading looks broken and a justified table cell worse.
+
+   `hyphens: auto` is not optional here, it's the thing that makes justification
+   survive. Justified text works by stretching word spaces to fill each line, so
+   in a ~65ch column a few long words leave big gaps that line up vertically into
+   "rivers" of whitespace. Hyphenation lets the browser break words instead, which
+   keeps the spacing even. It relies on the browser knowing the language — that's
+   the `lang="en"` on <html> in Layout.astro, so don't remove it.
+
+   Specificity note: `.prose p` is (0,1,1) and beats the plugin's
+   `.prose :where(p)` at (0,1,0) — `:where()` contributes nothing. Unlayered CSS
+   also outranks the plugin's @layer, so no !important needed. */
+.prose p {
+  text-align: justify;
+  hyphens: auto;
 }
 
 /* Shiki's dual-theme output. Because astro.config.mjs sets `themes` (plural),

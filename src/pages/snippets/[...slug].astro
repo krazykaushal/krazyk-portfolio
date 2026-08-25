@@ -106,10 +106,13 @@ const { Content } = await render(snippet);
         }
       </header>
 
-      {/* `max-w-none` because `prose` sets its own 65ch, which would render the
-          body narrower than the h1 above it — that reads as a bug, not as a
-          deliberate measure. The max-w-3xl container owns the measure. */}
-      <div class="prose mt-10 max-w-none">
+      {/* `prose` keeps its own `max-width: 65ch` — we no longer override it with
+          `max-w-none`. 65ch is a CHARACTER count, so it holds the reading measure
+          at ~65 characters whatever the root font size is; the max-w-3xl
+          container is in rem and grew to 864px when the base size went to
+          1.125rem, which is 85-95 characters a line. The body being narrower than
+          the h1 above it is the deliberate trade. */}
+      <div class="prose mt-10">
         <Content />
       </div>
     </article>

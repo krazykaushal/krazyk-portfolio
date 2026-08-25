@@ -122,11 +122,13 @@ const minutes = readingTime(post);
           renders completely unstyled, because Tailwind's preflight strips
           browser defaults.
 
-          `max-w-none` because `prose` sets its own max-width: 65ch. Without this
-          the body would be visibly narrower than the h1 above it, which reads as
-          a bug rather than as a deliberate measure — the max-w-3xl container is
-          already doing that job for the whole page. */}
-      <div class="prose font-semibold mt-12 max-w-none">
+          `prose` keeps its own `max-width: 65ch` — we no longer override it with
+          `max-w-none`. 65ch is a CHARACTER count, so it holds the reading measure
+          at ~65 characters whatever the root font size is; the max-w-3xl
+          container is in rem and grew to 864px when the base size went to
+          1.125rem, which is 85-95 characters a line. The body being narrower than
+          the h1 above it is the deliberate trade. */}
+      <div class="prose font-semibold mt-12">
         <Content />
       </div>
     </article>
