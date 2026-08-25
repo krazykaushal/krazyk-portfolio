@@ -63,12 +63,21 @@ src/
     blog/                # posts as .mdx; the filename is the slug
       hello-world.mdx
       _TEMPLATE.mdx      # frontmatter reference; `_` prefix keeps it out of the collection
+    snippets/            # code reference; `language` is a z.enum, not a string
+    monthlog/            # one entry a month; the filename IS the month (2026-08.mdx)
   pages/
     index.astro          # the long-scroll home page (file-based routing: this is `/`)
     blog/
       index.astro        # the post list
       [...slug].astro    # one post — rest param: glob ids can contain a slash
       tags/[tag].astro   # one tag's posts
+    snippets/
+      index.astro        # index + language filter row
+      [...slug].astro    # one snippet
+      languages/[language].astro  # browse — nested to avoid colliding with [...slug]
+    monthlog/
+      index.astro        # the calendar: month cards grouped by year
+      [month].astro      # one month — single param; YYYY-MM is always one segment
     rss.xml.ts           # the feed endpoint (a .ts endpoint, not a page)
   layouts/
     Layout.astro         # <html>/<head> shell: meta tags, fonts, pre-paint theme script
@@ -78,11 +87,15 @@ src/
       avatar-source.svg  # source art (Figma export); not imported at runtime
     blog/
       PostCard.astro     # one post as an <li>; the caller owns the grid
+    snippets/
+      SnippetCard.astro  # one snippet as an <li>; language badge + label tags
+    monthlog/
+      MonthCard.astro    # one month as a calendar tile; whole card is the link
     sections/
       Hero.tsx           # island — GSAP text intro
       About.tsx          # island — terminal typing state machine
       Work.astro         # static
-      Writing.astro      # static — latest-3 teaser; renders nothing when empty
+      Writing.astro      # static — the hub: three category cards with live counts
       Skills.astro       # static
       Contact.astro      # static shell around the form island
       ContactForm.tsx    # island — form state
@@ -94,7 +107,10 @@ src/
       SocialLinks.astro
       ThemeToggle.astro
   lib/
-    blog.ts              # post queries + date/reading-time formatting
+    blog.ts              # post queries + reading time
+    content.ts           # formatDate / formatMonth — shared across collections
+    snippets.ts          # snippet queries + language grouping
+    monthlog.ts          # month queries + groupByYear
     gsap.ts              # registers ScrollTrigger/SplitText/ScrambleText — React-free
     gsap-react.ts        # adds useGSAP on top; for islands only
   styles/
@@ -223,6 +239,7 @@ Phases 0–6 were completed on the Next.js version; the feature set carried over
 - [ ] **Lighthouse pass** — the Next version scored 100/100/100/100 desktop, 99/100/100/100 mobile. Re-measure; the static sections now ship no JS at all, so it should hold or improve.
 - [ ] **OG image** — decide the approach (see the open item above).
 - [x] **Blog** — MDX posts in a content collection: `/blog`, `/blog/<slug>`, `/blog/tags/<tag>`, a home-page teaser, a fixed nav, and `/rss.xml`. Drafts are hidden in production only. Post and tag pages ship zero JS. Out-of-scope decisions are recorded at the bottom of `BLOG.md`.
+- [x] **Snippets + monthlog** — two more collections, top-level routes, and the home-page Writing section rewritten as their hub. `/rss.xml` carries posts and monthlog interleaved by date; snippets stay out. Build sheet: `WRITING.md`.
 - [ ] **Linting** — `astro check` covers types only. `eslint-plugin-astro` would restore the ESLint layer; a dependency, so ask first.
 
 ---

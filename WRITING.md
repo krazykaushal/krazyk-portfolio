@@ -1,10 +1,15 @@
 # Writing build sheet
 
-Companion to `BLOG.md`. That one is finished and is now mostly a record of
-decisions; this one is live.
+Companion to `BLOG.md`.
 
-The working agreement in `CLAUDE.md` applies. Steps are ordered so each one is
-independently verifiable and the tree is green after every commit.
+**Status: complete.** Steps 1-12 shipped, `feat: add snippets content collection`
+through `feat: wire snippets and monthlog into the hub, nav and feed`. Step 9 was
+rewritten mid-build when `/monthlog` changed from one inline page to a calendar
+plus per-month pages; that section describes what's actually built.
+
+What still matters here is the **route-collision warning** below and
+**"Explicitly out of scope"** at the bottom — those are decisions, and they're
+why none of this gets re-litigated the next time the writing section grows.
 
 ---
 
