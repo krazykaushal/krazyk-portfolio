@@ -4,14 +4,14 @@
 // A centered column rather than the home page's two-lane sticky-avatar shell.
 // See the note at the bottom of this file — that's a decision left open on
 // purpose, not an oversight.
-import Layout from '@/layouts/Layout.astro';
-import Footer from '@/components/ui/Footer.astro';
-import SnippetCard from '@/components/snippets/SnippetCard.astro';
+import Layout from "@/layouts/Layout.astro";
+import Footer from "@/components/ui/Footer.astro";
+import SnippetCard from "@/components/snippets/SnippetCard.astro";
 import {
   getPublishedSnippets,
   allLanguages,
   languageCounts,
-} from '@/lib/snippets';
+} from "@/lib/snippets";
 
 const snippets = await getPublishedSnippets();
 
@@ -77,14 +77,3 @@ const counts = languageCounts(snippets);
 
   <Footer />
 </Layout>
-
-{
-  /* TODO(you), your call: /blog uses the two-lane sticky-avatar shell, and the
-     comment in src/pages/blog/index.astro says a THIRD page wanting it is the
-     moment to extract PageShell.astro. This page is that third candidate, and
-     the centered column above dodges the decision rather than making it.
-
-     If you'd rather these listing pages all carry the avatar: extract
-     src/components/ui/PageShell.astro with a <slot /> for the content lane
-     FIRST, then use it in all three. Don't paste the shell a third time. */
-}

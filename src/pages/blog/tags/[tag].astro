@@ -36,7 +36,7 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { tag, posts } = Astro.props;
 
 const heading = `Posts tagged “${tag}”`;
-const count = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
+const count = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
 ---
 
 <Layout
@@ -66,11 +66,3 @@ const count = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
 
   <Footer />
 </Layout>
-
-{
-  /* TODO(you), your call: the two-lane sticky-avatar shell now has two copies
-     (src/pages/index.astro and src/pages/blog/index.astro). If you want it here
-     too, that's the third use — extract it as src/components/ui/PageShell.astro
-     with a <slot /> for the content lane first, then use it in all three, rather
-     than pasting it once more. */
-}

@@ -4,10 +4,9 @@
 //
 // Everything here runs at build time: the frontmatter reads the collection, the
 // markup renders to static HTML. The only JavaScript this page ships is the
-// avatar island and the Reveal script.
+// Reveal script — the sticky avatar lane used to live here and no longer does,
+// so the Avatar island is gone from this route entirely.
 import Layout from '@/layouts/Layout.astro';
-import Avatar from '@/components/Avatar/Avatar.tsx';
-import SocialLinks from '@/components/ui/SocialLinks.astro';
 import Reveal from '@/components/ui/Reveal.astro';
 import Footer from '@/components/ui/Footer.astro';
 import PostCard from '@/components/blog/PostCard.astro';
@@ -20,70 +19,47 @@ const posts = await getPublishedPosts();
   title="Writing — Kaushal Patel"
   description="Notes on building for the web — Astro, React, animation, and whatever I'm learning."
 >
-  {/* Same two-lane shell as the home page: content on the left, sticky avatar
-      lane on the right (flex-row-reverse), stacking to a single column on
-      mobile. This markup is duplicated from src/pages/index.astro on purpose —
-      two uses isn't yet evidence of the right abstraction. If a third page
-      needs it, that's the moment to extract a PageShell.astro. */}
-  <main class="mx-auto flex max-w-7xl flex-col md:flex-row-reverse md:items-start">
-    <div
-      class="flex flex-col items-center justify-center gap-6 px-6 pt-20 md:sticky md:top-0 md:h-svh md:w-2/5 md:shrink-0 md:flex-row md:gap-4 md:px-0 md:pt-0 lg:w-1/3"
-    >
-      <div class="relative w-56 shrink-0 sm:w-72 md:min-w-0 md:flex-1">
-        <div
-          aria-hidden="true"
-          class="absolute left-1/2 top-[-10%] -z-20 aspect-square w-[88%] -translate-x-1/2 rounded-full bg-accent/20 blur-2xl"
-        >
-        </div>
-        <div
-          aria-hidden="true"
-          class="absolute left-1/2 top-[-6%] -z-10 hidden aspect-square w-[78%] -translate-x-1/2 rounded-full bg-linear-to-b from-zinc-100 to-zinc-300 dark:block"
-        >
-        </div>
-        {/* client:load matches the home page so the avatar behaves identically
-            on both. If the blog's Lighthouse score ever needs the headroom,
-            client:idle is the cheaper option here — this page has no on-load
-            hero timeline waiting on it. */}
-        <Avatar client:load className="h-auto w-full" />
-      </div>
+  {/* A centered column, the same shell as /snippets and the tag pages: this is
+      a list you come here to read, so the measure matters more than the
+      showcase. That also settles the open question those files left — the
+      two-lane sticky-avatar shell now has exactly one copy (the home page), so
+      there's nothing left to extract into a PageShell.astro. */}
+  <main class="mx-auto w-full max-w-4xl px-6 pb-16 pt-24 sm:pb-24 sm:pt-28">
+    {/* <h1> because this is the page's own title — the home page's sections
+        use <h2> since the hero owns the h1 there. One h1 per page. */}
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      Blog
+    </h1>
 
-      <SocialLinks class="shrink-0" />
-    </div>
+    <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+      Notes on things I'm building and learning — mostly the web platform,
+      animation, and whatever I've just gotten wrong.
+    </p>
 
-    <div class="md:min-w-0 md:flex-1">
-      <section class="px-6 py-24 md:px-16 lg:px-24">
-        {/* <h1> because this is the page's own title — the home page's sections
-            use <h2> since the hero owns the h1 there. One h1 per page. */}
-        <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Writing
-        </h1>
-
-        <p class="mt-4 max-w-2xl text-base leading-relaxed text-muted">
-          Notes on things I'm building and learning — mostly the web platform,
-          animation, and whatever I've just gotten wrong.
+    {
+      posts.length === 0 ? (
+        /* An empty list renders as a bare heading with nothing under it,
+           which reads as broken rather than as "no posts yet". */
+        <p class="mt-8 font-mono text-sm text-muted">
+          Nothing published yet. Soon.
         </p>
+      ) : (
+        <Reveal>
+          {/* The layout lives here, not in PostCard — the card renders one
+              <li> and lets each caller arrange them. A single flex column
+              rather than a grid: every row is full width, so there are no
+              columns to declare and no equal-height problem to solve.
 
-        {
-          posts.length === 0 ? (
-            /* An empty grid renders as a bare heading with nothing under it,
-               which reads as broken rather than as "no posts yet". */
-            <p class="mt-8 font-mono text-sm text-muted">
-              Nothing published yet. Soon.
-            </p>
-          ) : (
-            <Reveal>
-              {/* The grid lives here, not in PostCard — the card renders one
-                  <li> and lets each caller choose its own columns. */}
-              <ul class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-                {posts.map((post) => (
-                  <PostCard post={post} headingLevel={2} />
-                ))}
-              </ul>
-            </Reveal>
-          )
-        }
-      </section>
-    </div>
+              `layout="row"` is opt-in, so the tag pages and the home-page
+              teaser keep their grid of tiles untouched. */}
+          <ul class="mt-10 flex flex-col gap-4">
+            {posts.map((post) => (
+              <PostCard post={post} headingLevel={2} layout="row" />
+            ))}
+          </ul>
+        </Reveal>
+      )
+    }
   </main>
 
   <Footer />
