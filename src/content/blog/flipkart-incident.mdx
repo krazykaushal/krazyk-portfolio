@@ -1,0 +1,30 @@
+---
+# Required.
+title: "The Flipkart Incident"
+description: "One or two sentences. Used on the card, in <meta description>, and in the RSS item."
+pubDate: 2026-01-01
+
+# Optional.
+# updatedDate: 2026-01-15
+tags: ["tag-one", "tag-two"]
+draft: true
+
+# Optional hero image. The path is relative to THIS file, and the image must
+# live under src/ (not public/) so Astro can optimize it. If you set heroImage
+# you must also set heroImageAlt — the schema enforces it.
+# heroImage: './hero.png'
+# heroImageAlt: 'Describe the image for screen readers.'
+---
+
+Body starts here, in Markdown.
+
+Because these are `.mdx` files and not `.md`, you can also import components
+and drop them inline — an Astro component for static markup, or a React island
+with a `client:*` directive if it needs to be interactive:
+
+{/* import Chart from '@/components/blog/Chart.tsx'; */}
+{/* <Chart client:visible /> */}
+
+Note that this comment syntax is a JSX expression, not an HTML comment, so it
+does not ship to the browser. In MDX, `<` and `{` are meaningful — wrap them in
+backticks when you mean them literally.

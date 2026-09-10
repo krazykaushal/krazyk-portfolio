@@ -1,0 +1,49 @@
+---
+title: "Run Docker without `sudo`"
+
+# Optional. One line on what it's for / when you'd reach for it.
+description: "Post Installation Docker step"
+
+# REQUIRED, and a closed set. Must be one of:
+#   typescript | python | bash | css | sql | astro
+# Anything else fails the build on purpose. Add a member to the z.enum in
+# src/content.config.ts when you need a new language.
+language: bash
+
+# Free-form. Lowercased automatically. Use these for work/personal, a project
+# name, a topic — anything the language axis doesn't capture.
+tags: [docker, bash]
+
+addedDate: 2026-09-01
+
+# Optional — only when you've actually changed it since.
+# updatedDate: 2026-09-01
+
+# Optional. Where you found it. Must be a valid URL if present.
+source: ["https://docs.docker.com/engine/install/linux-postinstall/"]
+
+draft: false
+---
+
+This snippet is useful when you have fresh install of docker on a machine, and you want to run docker commands without using `sudo` (i.e. Manage Docker as non-root user) as by default only the Root user can run docker commands.
+
+1. Add user `$USER` (e.g. ubuntu) to the docker group
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+2. If you restart the terminal or SSH session, you can see the effect that now you can use docker without sudo, but to take them effect immediately you must run the following command.
+
+```bash
+newgrp docker
+```
+
+3. Verify the Installation
+
+```bash
+docker --version
+docker compose version
+```
+
+The above should run without throwing any error.

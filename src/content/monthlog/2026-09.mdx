@@ -1,0 +1,47 @@
+---
+# Copy this, rename it to the month it covers, delete the comments.
+# The filename IS the month: `2026-09.mdx` → the #2026-09 anchor on /monthlog.
+#
+# The `_` prefix keeps this file out of the collection.
+
+# Must be YYYY-MM, with the leading zero. `2026-9` fails the build.
+# Yes, this repeats the filename — see the comment in src/content.config.ts.
+month: 2026-09
+
+title: "Self-Hosting Rush"
+
+# Optional. Shows up as the RSS item description.
+description: "My journey to self-hosting the on Oracle and using currently used Laptop as Home Server for testing"
+
+draft: True
+---
+
+## Bought my first domain
+
+So I am now the official owner of the `kaushal.fyi` domain. I have been wanting to buy a domain for a pretty long time since last year when I wanted to host my portfolio on my own domain instead of every other portfolio's first choice with the same `*.vercel.app`.
+Currently I have not transferred my portfolio to this domain nor I have deployed in production the converted version of my portfolio from Next.js to Astro.
+But I did explored all the self-hosting I could do on Orcale instance and attached subdomanin to each service.
+
+I have bought my domain from Cloudflare as it served the best renewal price comapared to any other provider.
+
+I have deployed and used the following service on these new Oracle instances:
+
+### Gateway
+
+- `cloudflared`
+- `caddy`
+- `authelia`
+- `uptime-kuma`
+- `ntfy`
+
+### 2 Arm Instnaces with more RAM:
+
+- `sparkyfitness`
+- `beszel`
+- `homepage`
+- `karakeep`
+
+## Homelab Journey
+
+I am now in desperate need for a Home Server or machine as I am having this constant itch to organize our families lifetime photos systematically.
+Currently hosted `immich` on one of my laptop which is connected to laptop used internal SATA HDD via enclosure.
