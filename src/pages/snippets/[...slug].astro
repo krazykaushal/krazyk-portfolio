@@ -121,21 +121,33 @@ const { Content } = await render(snippet);
     </article>
 
     {
-      /* `source` is validated as a URL by the schema, so this is never a dead
-         anchor — a typo would have failed the build. */
-      source && (
-        <p class="mt-12 border-t border-foreground/10 pt-8 font-mono text-sm text-muted">
-          Source:{' '}
-          <a
-            href={source}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-avatar-react
-            class="text-accent underline underline-offset-2 transition-opacity hover:opacity-80"
-          >
-            {new URL(source).hostname}
-          </a>
-        </p>
+      /* Every entry is validated as a URL by the schema, so none of these is a
+         dead anchor — a typo would have failed the build.
+
+         Length check, not a truthiness check: `.default([])` in the schema
+         means this is always an array, and `[]` is truthy — a bare `source &&`
+         would render an empty <ul> with a border rule floating above it. */
+      source.length > 0 && (
+        <section class="mt-12 border-t border-foreground/10 pt-8 font-mono text-sm text-muted">
+          <h2 class="font-normal">
+            {source.length === 1 ? 'Source' : 'Sources'}
+          </h2>
+          <ul class="mt-2 space-y-1">
+            {source.map((url) => (
+              <li>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-avatar-react
+                  class="text-accent underline underline-offset-2 transition-opacity hover:opacity-80"
+                >
+                  {new URL(url).hostname}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )
     }
   </main>

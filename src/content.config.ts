@@ -114,7 +114,11 @@ const snippets = defineCollection({
     // `z.url()`, not `z.string().url()` — Astro bundles Zod 4, which moved the
     // string formats to top-level functions and deprecated the chained methods.
     // `astro check` flags the old spelling as a deprecation hint.
-    source: z.url().optional(),
+    //
+    // `.default([])` rather than `.optional()`, same reasoning as `tags`: the
+    // generated type is `string[]`, never `string[] | undefined`, so consumers
+    // can go straight to `.length` / `.map` with no null check.
+    source: z.array(z.url()).default([]),
 
     draft: z.boolean().default(false),
   }),
